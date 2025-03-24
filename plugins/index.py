@@ -154,27 +154,22 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                 if current % 30 == 0:
                     can = [[InlineKeyboardButton('Cancel', callback_data='index_cancel')]]
                     reply = InlineKeyboardMarkup(can)
-                    try:
-                        await msg.edit_text(
-                            text=f"Total messages fetched: <code>{current}</code>\nTotal messages saved: <code>{total_files}</code>\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>",
-                            reply_markup=reply
-                        )
-                    except MessageNotModified:
-                        pass
+                    await msg.edit_text(
+                        text=f"Total messages fetched: <code>{current}</code>\nTotal messages saved: <code>{total_files}</code>\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>",
+                        reply_markup=reply)
                 if message.empty:
                     deleted += 1
                     continue
-                elif not message.media:
+                if message.media not in [enums.MessageMediaType.VIDEO, enums.MessageMediaType.AUDIO, enums.MessageMediaType.DOCUMENT]:
                     no_media += 1
-                    continue
-                elif message.media not in [enums.MessageMediaType.VIDEO, enums.MessageMediaType.AUDIO, enums.MessageMediaType.DOCUMENT]:
-                    unsupported += 1
                     continue
                 media = getattr(message, message.media.value, None)
                 if not media:
                     unsupported += 1
                     continue
+                media.file_type = message.media.value
                 media.caption = message.caption
+                media.thumb = None  # থাম্বনেইল রিমুভ করার জন্য
                 aynav, vnay = await save_file(media)
                 if aynav:
                     total_files += 1
@@ -184,8 +179,6 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                     errors += 1
         except Exception as e:
             logger.exception(e)
-            k = await msg.edit(f'Error: {e}')
-            await k.reply_text(f'Succesfully saved <code>{total_files}</code> to dataBase!\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>')
-            await k.reply_text("**If You Get Message Not Modified Error Then Skip Your Saved File Then Index Again**")
+            await msg.edit(f'Error: {e}')
         else:
             await msg.edit(f'Succesfully saved <code>{total_files}</code> to dataBase!\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>')
