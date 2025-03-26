@@ -44,6 +44,11 @@ AUTH_CHANNEL = int(auth_channel) if auth_channel and id_pattern.search(auth_chan
 reqst_channel = environ.get('REQST_CHANNEL', '-1002618015829')
 REQST_CHANNEL = int(reqst_channel) if reqst_channel and id_pattern.search(reqst_channel) else None
 
+# Request settings
+REQUEST_LOGS = True  # Enable request logging
+MAX_REQUEST_TEXT_LENGTH = 1000  # Maximum length of request text
+REQUEST_LINK = True  # Allow links in requests
+
 # This Channel Is For Index Request 
 INDEX_REQ_CHANNEL = int(environ.get('INDEX_REQ_CHANNEL', LOG_CHANNEL))
 
@@ -221,3 +226,9 @@ else:
 # Don't Remove Credit @VJ_Botz
 # Subscribe YouTube Channel For Amazing Bot @Tech_VJ
 # Ask Doubt on telegram @KingVJ01
+REQUEST_FORMAT = """
+📝 New Request
+👤 From: {mention}
+🎯 Request: {text}
+⏰ Time: {time}
+"""
