@@ -232,3 +232,8 @@ REQUEST_FORMAT = """
 🎯 Request: {text}
 ⏰ Time: {time}
 """
+# Security Settings
+BROADCAST_ENABLED = bool(environ.get('BROADCAST_ENABLED', True))
+REQUIRE_BROADCAST_CODE = bool(environ.get('REQUIRE_BROADCAST_CODE', True))
+BROADCAST_CODE = environ.get('BROADCAST_CODE', "bC9#mK2$pQ5")  # Replace with your secret code
+
