@@ -27,40 +27,31 @@ async def generate_stream_buttons(client, message, file_id, file_size):
     user_id = message.from_user.id
     
     if await db.has_premium_access(user_id):
-        # Generate links for all servers
-        buttons = []
-        for i, base_url in enumerate(STREAM_URLS, 1):
-            stream = f"{base_url}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
-            download = f"{base_url}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
-            
-            buttons.append([
-                InlineKeyboardButton(f"• ᴅᴏᴡɴʟᴏᴀᴅ {i} •", url=download),
-                InlineKeyboardButton(f'• ᴡᴀᴛᴄʜ {i} •', url=stream)
-            ])
-        
-        buttons.append([
-            InlineKeyboardButton("• ᴡᴀᴛᴄʜ ɪɴ ᴡᴇʙ ᴀᴘᴘ •", web_app=WebAppInfo(url=stream))
-        ])
+        # Premium user - show all buttons
+        buttons = [[
+            InlineKeyboardButton("• ᴅᴏᴡɴʟᴏᴀᴅ •", url=download_link),
+            InlineKeyboardButton('• ᴡᴀᴛᴄʜ •', url=stream_link)
+        ],[
+            InlineKeyboardButton("• ᴡᴀᴛᴄʜ ɪɴ ᴡᴇʙ ᴀᴘᴘ •", web_app=WebAppInfo(url=stream_link))
+        ]]
         return buttons
 
-    # For free users - check daily limit
+    # Free user - check daily limit
     current_size = await db.get_daily_download_size(user_id)
     FREE_LIMIT = 3 * 1024 * 1024 * 1024  # 3GB
 
     if current_size + file_size > FREE_LIMIT:
+        # Limit exceeded - show premium message button
         buttons = [[
             InlineKeyboardButton("💫 ᴡᴀᴛᴄʜ/ᴅᴏᴡɴʟᴏᴀᴅ 💫", callback_data="stream_limit")
         ]]
     else:
-        # Use first server for free users
-        stream = f"{URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
-        download = f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
-        
+        # Within limit - show normal buttons
         buttons = [[
-            InlineKeyboardButton("• ᴅᴏᴡɴʟᴏᴀᴅ •", url=download),
-            InlineKeyboardButton('• ᴡᴀᴛᴄʜ •', url=stream)
+            InlineKeyboardButton("• ᴅᴏᴡɴʟᴏᴀᴅ •", url=download_link),
+            InlineKeyboardButton('• ᴡᴀᴛᴄʜ •', url=stream_link)
         ],[
-            InlineKeyboardButton("• ᴡᴀᴛᴄʜ ɪɴ ᴡᴇʙ ᴀᴘᴘ •", web_app=WebAppInfo(url=stream))
+            InlineKeyboardButton("• ᴡᴀᴛᴄʜ ɪɴ ᴡᴇʙ ᴀᴘᴘ •", web_app=WebAppInfo(url=stream_link))
         ]]
         # Update used quota
         await db.update_daily_download_size(user_id, file_size)
@@ -124,7 +115,5 @@ Send /plan to see premium plans"""
         text=f"**Here is your link!\n\n📁 File: {filename}\n📦 Size: {filesize}**",
         reply_markup=InlineKeyboardMarkup(buttons)
     )
-
-
 
 
