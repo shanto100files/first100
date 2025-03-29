@@ -790,13 +790,37 @@ async def cb_handler(client: Client, query: CallbackQuery):
             if settings['url']:
                 if clicked == typed:
                     temp.SHORT[clicked] = query.message.chat.id
-                    await query.answer(url=f"https://telegram.me/{me.username}?start=short_{file_id}")
+                    await query.answer(
+                        text="Processing your request...",
+                        show_alert=True
+                    )
+                    await query.message.reply(
+                        text="Here's your link:",
+                        reply_markup=InlineKeyboardMarkup([
+                            [InlineKeyboardButton(
+                                "📥 Download",
+                                url=f"https://t.me/{me.username}?start=short_{file_id}"
+                            )]
+                        ])
+                    )
                     return
                 else:
                     await query.answer(f"Hᴇʏ {query.from_user.first_name}, Tʜɪs Is Nᴏᴛ Yᴏᴜʀ Mᴏᴠɪᴇ Rᴇǫᴜᴇsᴛ. Rᴇǫᴜᴇsᴛ Yᴏᴜʀ's !", show_alert=True)
             else:
                 if clicked == typed:
-                    await query.answer(url=f"https://telegram.me/{me.username}?start={ident}_{file_id}")
+                    await query.answer(
+                        text="Processing your request...",
+                        show_alert=True
+                    )
+                    await query.message.reply(
+                        text="Here's your link:",
+                        reply_markup=InlineKeyboardMarkup([
+                            [InlineKeyboardButton(
+                                "📥 Download",
+                                url=f"https://t.me/{me.username}?start={ident}_{file_id}"
+                            )]
+                        ])
+                    )
                     return
                 else:
                     await query.answer(f"Hᴇʏ {query.from_user.first_name}, Tʜɪs Is Nᴏᴛ Yᴏᴜʀ Mᴏᴠɪᴇ Rᴇǫᴜᴇsᴛ. Rᴇǫᴜᴇsᴛ Yᴏᴜʀ's !", show_alert=True)
