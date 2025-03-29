@@ -196,7 +196,13 @@ if 'DYNO' in environ:
     ON_HEROKU = True
 else:
     ON_HEROKU = False
-URL = environ.get("URL", "https://deafening-sacha-cinepix-7c69b59c.koyeb.app/")
+# Multiple streaming URLs
+STREAM_URLS = [
+    "https://deafening-sacha-cinepix-7c69b59c.koyeb.app/",
+    "https://neil-fvwq.onrender.com"
+]
+# Default URL if no specific one is chosen
+URL = STREAM_URLS[0]
 
 
 # Rename Info : If True Then Bot Rename File Else Not
