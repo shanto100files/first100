@@ -1098,6 +1098,32 @@ async def filter_qualities_cb_handler(client: Client, query: CallbackQuery):
 async def cb_handler(client: Client, query: CallbackQuery):
     if query.data == "close_data":
         await query.message.delete()
+    
+    elif query.data.startswith("stream_limit"):
+        if not await db.has_premium_access(query.from_user.id):
+            btn = [
+                [InlineKeyboardButton("💫 ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ 💫", callback_data="buy_premium")],
+                [InlineKeyboardButton("• ᴛʀʏ ᴀɢᴀɪɴ •", callback_data="try_again")],
+                [InlineKeyboardButton("⚠️ ᴄʟᴏsᴇ ⚠️", callback_data="close_data")]
+            ]
+            
+            remaining_gb = (3 - (await db.get_daily_download_size(query.from_user.id))/(1024*1024*1024))
+            text = f"""<b>📊 Daily Stream Limit Exceeded!</b>
+
+<b>• Free users can stream up to 3GB/day
+• Your remaining quota: {remaining_gb:.2f}GB 
+• Buy Premium for unlimited streaming
+
+Benefits of Premium:
+• Unlimited Streaming
+• No Daily Limits
+• Ad-free Experience
+• Priority Support</b>"""
+            
+            await query.message.edit_text(text=text, reply_markup=InlineKeyboardMarkup(btn))
+        else:
+            # If somehow premium user gets this callback
+            await query.answer("You are already a premium user!", show_alert=True)
     elif query.data == "get_trail":
         user_id = query.from_user.id
         free_trial_status = await db.get_free_trial_status(user_id)
