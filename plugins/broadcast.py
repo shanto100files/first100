@@ -10,6 +10,16 @@ from utils import broadcast_messages, broadcast_messages_group
         
 @Client.on_message(filters.command("broadcast") & filters.user(ADMINS))
 async def pm_broadcast(bot, message):
+    # Add authentication check
+    if not message.from_user or message.from_user.id not in ADMINS:
+        return
+    # Add confirmation step
+    confirm = await bot.ask(
+        chat_id=message.from_user.id,
+        text="Are you sure you want to broadcast? Reply 'yes' to confirm"
+    )
+    if confirm.text.lower() != "yes":
+        return await message.reply("Broadcast cancelled")
     b_msg = await bot.ask(chat_id = message.from_user.id, text = "Now Send Me Your Broadcast Message")
     try:
         users = await db.get_all_users()
