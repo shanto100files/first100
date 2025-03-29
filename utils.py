@@ -175,6 +175,8 @@ async def get_poster(query, bulk=False, id=False, file=None):
 
 async def broadcast_messages(user_id, message):
     try:
+        # Add logging
+        logger.info(f"Broadcasting message to {user_id} from {message.from_user.id}")
         await message.copy(chat_id=user_id)
         return True, "Success"
     except FloodWait as e:
@@ -193,6 +195,7 @@ async def broadcast_messages(user_id, message):
         logging.info(f"{user_id} - PeerIdInvalid")
         return False, "Error"
     except Exception as e:
+        logger.error(f"Broadcast error: {str(e)}")
         return False, "Error"
 
 async def broadcast_messages_group(chat_id, message):
