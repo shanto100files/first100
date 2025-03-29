@@ -27,34 +27,21 @@ async def generate_stream_buttons(client, message, file_id, file_size):
     user_id = message.from_user.id
     
     if await db.has_premium_access(user_id):
-        # Premium user - show all buttons
+        # Premium user - show streaming buttons
+        download_link = f"{URL}download/{file_id}"
+        stream_link = f"{URL}stream/{file_id}"
+        
         buttons = [[
             InlineKeyboardButton("• ᴅᴏᴡɴʟᴏᴀᴅ •", url=download_link),
             InlineKeyboardButton('• ᴡᴀᴛᴄʜ •', url=stream_link)
         ],[
             InlineKeyboardButton("• ᴡᴀᴛᴄʜ ɪɴ ᴡᴇʙ ᴀᴘᴘ •", web_app=WebAppInfo(url=stream_link))
         ]]
-        return buttons
-
-    # Free user - check daily limit
-    current_size = await db.get_daily_download_size(user_id)
-    FREE_LIMIT = 3 * 1024 * 1024 * 1024  # 3GB
-
-    if current_size + file_size > FREE_LIMIT:
-        # Limit exceeded - show premium message button
+    else:
+        # Free user - show only premium button
         buttons = [[
             InlineKeyboardButton("💫 ᴡᴀᴛᴄʜ/ᴅᴏᴡɴʟᴏᴀᴅ 💫", callback_data="stream_limit")
         ]]
-    else:
-        # Within limit - show normal buttons
-        buttons = [[
-            InlineKeyboardButton("• ᴅᴏᴡɴʟᴏᴀᴅ •", url=download_link),
-            InlineKeyboardButton('• ᴡᴀᴛᴄʜ •', url=stream_link)
-        ],[
-            InlineKeyboardButton("• ᴡᴀᴛᴄʜ ɪɴ ᴡᴇʙ ᴀᴘᴘ •", web_app=WebAppInfo(url=stream_link))
-        ]]
-        # Update used quota
-        await db.update_daily_download_size(user_id, file_size)
     
     return buttons
 
@@ -115,5 +102,57 @@ Send /plan to see premium plans"""
         text=f"**Here is your link!\n\n📁 File: {filename}\n📦 Size: {filesize}**",
         reply_markup=InlineKeyboardMarkup(buttons)
     )
+
+@Client.on_callback_query()
+async def cb_handler(client: Client, query: CallbackQuery):
+    if query.data == "stream_limit":
+        btn = [
+            [InlineKeyboardButton("💫 ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ 💫", callback_data="buy_premium")],
+            [InlineKeyboardButton("⚠️ ᴄʟᴏsᴇ ⚠️", callback_data="close_data")]
+        ]
+        
+        text = """<b>🔒 Premium Access Required!</b>
+
+<b>This content is only available for Premium users.
+
+Benefits of Premium:
+• Unlimited Streaming & Downloads
+• Ad-free Experience
+• Priority Support
+• High Speed Downloads
+• All Premium Content Access
+
+Buy Premium now to unlock all features!</b>"""
+        
+        await query.message.edit_text(text=text, reply_markup=InlineKeyboardMarkup(btn))
+
+@Client.on_callback_query(filters.regex("buy_premium"))
+async def buy_premium_handler(client, query):
+    btn = [[
+        InlineKeyboardButton("💳 বিকাশ পেমেন্ট", callback_data="bkash_payment"),
+        InlineKeyboardButton("🏠 হোম", callback_data="start")
+    ]]
+    
+    text = f"""<b>📲 বিকাশ পেমেন্ট প্ল্যান 
+
+💰 উপলব্ধ প্যাকেজ সমূহ:
+
+• ২ সপ্তাহ - ১০ টাকা
+• ১ মাস - ২০ টাকা  
+• ৩ মাস - ৬০ টাকা
+• ৬ মাস - ১২০ টাকা
+
+✅ প্রিমিয়াম ফিচার:
+• ভেরিফিকেশন ফ্রি
+• সরাসরি ফাইল
+• বিজ্ঞাপন মুক্ত
+• হাই স্পিড ডাউনলোড
+• আনলিমিটেড কন্টেন্ট
+• ২৪/৭ সাপোর্ট
+
+বিকাশ নাম্বার: {BKASH_NUMBER}
+Send Money করে নিচের বাটনে ক্লিক করুন</b>"""
+
+    await query.message.edit_text(text=text, reply_markup=InlineKeyboardMarkup(btn))
 
 
