@@ -296,3 +296,19 @@ async def list_chats(bot, message):
         with open('chats.txt', 'w+') as outfile:
             outfile.write(out)
         await message.reply_document('chats.txt', caption="List Of Chats")
+
+@Client.on_message(filters.command('stream') & filters.user(ADMINS))
+async def stream_file(bot, message):
+    if len(message.command) == 1:
+        return await message.reply('Give me a file ID')
+    file_id = message.command[1]
+    try:
+        file_details = await get_file_details(file_id)
+        if not file_details:
+            return await message.reply('File not found! Please check the file ID.')
+        file_name = file_details[0]['file_name']
+        file_size = file_details[0]['file_size']
+        stream_url = f"{STREAM_URL}/stream/{file_id}"
+        await message.reply(f"Streaming {file_name} ({get_size(file_size)})\n\nURL: {stream_url}")
+    except Exception as e:
+        await message.reply(f"Error: {e}")
