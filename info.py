@@ -203,6 +203,9 @@ STREAM_URLS = [
 ]
 # Default URL if no specific one is chosen
 URL = STREAM_URLS[0]
+# Add your Cloudflare worker URL
+STREAM_URL = "https://divine-smoke-8290.bdmovieshub.workers.dev/"
+STREAM_ENABLED = True
 
 
 # Rename Info : If True Then Bot Rename File Else Not
