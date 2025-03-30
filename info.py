@@ -198,7 +198,7 @@ else:
     ON_HEROKU = False
 # Multiple streaming URLs
 STREAM_URLS = [
-    "https://deafening-sacha-cinepix-7c69b59c.koyeb.app/",
+    "https://divine-smoke-8290.bdmovieshub.workers.dev/",
     "https://neil-fvwq.onrender.com"
 ]
 # Default URL if no specific one is chosen
