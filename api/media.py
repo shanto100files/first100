@@ -1,5 +1,9 @@
+import logging
 from aiohttp import web
 from database.ia_filterdb import col, sec_col
+from bson.errors import InvalidId
+
+logger = logging.getLogger(__name__)
 
 @routes.get('/health')
 async def health_check(request):
@@ -23,34 +27,58 @@ async def get_all_files(request):
     try:
         files = []
         
-        # প্রথম ডাটাবেস থেকে ফাইল নিয়ে আসা 
-        cursor1 = col.find({}).sort('file_name', 1)
-        async for file in cursor1:
-            files.append({
-                'file_id': file['file_id'],
-                'file_name': file['file_name'],
-                'file_size': file['file_size'],
-                'stream_link': f"/stream/{file['file_id']}",
-                'download_link': f"/download/{file['file_id']}"
+        # First database
+        try:
+            cursor1 = col.find({})
+            async for file in cursor1:
+                try:
+                    files.append({
+                        'file_id': str(file.get('_id', '')),
+                        'file_name': file.get('file_name', 'Untitled'),
+                        'file_size': file.get('file_size', 0),
+                        'mime_type': file.get('mime_type', 'application/octet-stream')
+                    })
+                except Exception as e:
+                    logger.error(f"Error processing file: {str(e)}")
+                    continue
+                    
+        except Exception as e:
+            logger.error(f"Error accessing first database: {str(e)}")
+
+        # Second database            
+        try:
+            cursor2 = sec_col.find({})
+            async for file in cursor2:
+                try:
+                    files.append({
+                        'file_id': str(file.get('_id', '')),
+                        'file_name': file.get('file_name', 'Untitled'),
+                        'file_size': file.get('file_size', 0),
+                        'mime_type': file.get('mime_type', 'application/octet-stream')
+                    })
+                except Exception as e:
+                    logger.error(f"Error processing file: {str(e)}")
+                    continue
+                    
+        except Exception as e:
+            logger.error(f"Error accessing second database: {str(e)}")
+
+        if not files:
+            return web.json_response({
+                'files': [],
+                'message': 'No files found'
             })
-            
-        # দ্বিতীয় ডাটাবেস থেকে ফাইল নিয়ে আসা
-        cursor2 = sec_col.find({}).sort('file_name', 1)
-        async for file in cursor2:
-            files.append({
-                'file_id': file['file_id'], 
-                'file_name': file['file_name'],
-                'file_size': file['file_size'],
-                'stream_link': f"/stream/{file['file_id']}",
-                'download_link': f"/download/{file['file_id']}"
-            })
-            
+
         return web.json_response({
-            'files': files
+            'files': files,
+            'total': len(files)
         })
         
     except Exception as e:
+        logger.error(f"Global error in get_all_files: {str(e)}")
         return web.json_response({
-            'error': str(e)
+            'error': 'Internal server error',
+            'message': str(e)
         }, status=500)
+
 
