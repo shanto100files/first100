@@ -57,14 +57,22 @@ async def handle_search(request):
         
         if not query:
             return web.json_response({
-                'error': 'Search query required'
-            }, status=400)
+                'files': [],
+                'total': 0
+            })
 
         files = await search_files(query)
         
+        # Make sure each file has the required fields
+        formatted_files = [{
+            'file_id': str(file.get('file_id', '')),
+            'file_name': str(file.get('file_name', '')),
+            'file_size': int(file.get('file_size', 0))
+        } for file in files]
+        
         return web.json_response({
-            'files': files,
-            'total': len(files)
+            'files': formatted_files,
+            'total': len(formatted_files)
         })
 
     except Exception as e:
