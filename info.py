@@ -198,7 +198,7 @@ else:
     ON_HEROKU = False
 # Multiple streaming URLs through Cloudflare
 STREAM_URLS = [
-    "https://divine-smoke-8290.bdmovieshub.workers.dev/",
+    "https://odd-darkness-074fsadsafsafasfjlknmmlkaytr9pe8afnhdklnfalskdftgy.bdmovieshub.workers.dev/",
     "https://your-cloudflare-domain-2.workers.dev/"
 ]
 # Default URL if no specific one is chosen
