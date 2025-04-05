@@ -5,7 +5,7 @@
 
 import re
 from os import environ
-from Script import script 
+from Script import script
 
 id_pattern = re.compile(r'^.\d+$')
 
@@ -28,7 +28,7 @@ AUTH_USERS = (auth_users + ADMINS) if auth_users else []
 # This Channel Is For When User Start Your Bot Then Bot Send That User Name And Id In This Log Channel, Same For Group Also.
 LOG_CHANNEL = int(environ.get('LOG_CHANNEL', '-1002506943014'))
 
-# This Is File Channel Where You Upload Your File Then Bot Automatically Save It In Database 
+# This Is File Channel Where You Upload Your File Then Bot Automatically Save It In Database
 CHANNELS = [int(ch) if id_pattern.search(ch) else ch for ch in environ.get('CHANNELS', '-1002638021400 -1002671899473 -1002607534796 -1002656224546 -1001727315752 -1002603049651 -1002507248656').split()]  # For Multiple Id Use One Space Between Each.
 
 # auth_channel means force subscribe channel.
@@ -36,7 +36,7 @@ CHANNELS = [int(ch) if id_pattern.search(ch) else ch for ch in environ.get('CHAN
 REQUEST_TO_JOIN_MODE = bool(environ.get('REQUEST_TO_JOIN_MODE', False)) # Set True Or False
 TRY_AGAIN_BTN = bool(environ.get('TRY_AGAIN_BTN', False)) # Set True Or False (This try again button is only for request to join fsub not for normal fsub)
 
-# This Is Force Subscribe Channel, also known as Auth Channel 
+# This Is Force Subscribe Channel, also known as Auth Channel
 auth_channel = environ.get('AUTH_CHANNEL', '') # give your force subscribe channel id here else leave it blank
 AUTH_CHANNEL = int(auth_channel) if auth_channel and id_pattern.search(auth_channel) else None
 
@@ -49,7 +49,7 @@ REQUEST_LOGS = True  # Enable request logging
 MAX_REQUEST_TEXT_LENGTH = 1000  # Maximum length of request text
 REQUEST_LINK = True  # Allow links in requests
 
-# This Channel Is For Index Request 
+# This Channel Is For Index Request
 INDEX_REQ_CHANNEL = int(environ.get('INDEX_REQ_CHANNEL', LOG_CHANNEL))
 
 # This Is Your Bot Support Group Id , Here Bot Will Not Give File Because This Is Support Group.
@@ -85,12 +85,12 @@ REFERAL_COUNT = int(environ.get('REFERAL_COUNT', '20')) # number of referal coun
 REFERAL_PREMEIUM_TIME = environ.get('REFERAL_PREMEIUM_TIME', '1month') # time in week, day, month.
 PAYMENT_QR = environ.get('PAYMENT_QR', 'https://ibb.co.com/KcpfNrdM') # বিকাশ QR কোডের ছবি লিংক
 BKASH_NUMBER = environ.get('BKASH_NUMBER', '01921209102') # আপনার বিকাশ নাম্বার
-PAYMENT_TEXT = environ.get('PAYMENT_TEXT', '''<b>📲 বিকাশ পেমেন্ট প্ল্যান 
+PAYMENT_TEXT = environ.get('PAYMENT_TEXT', '''<b>📲 বিকাশ পেমেন্ট প্ল্যান
 
 💰 উপলব্ধ প্যাকেজ সমূহ:
 
 • ২ সপ্তাহ - ১০ টাকা
-• ১ মাস - ২০ টাকা  
+• ১ মাস - ২০ টাকা
 • ৩ মাস - ৬০ টাকা
 • ৬ মাস - ১২০ টাকা
 
@@ -162,7 +162,7 @@ TUTORIAL = environ.get('TUTORIAL', '') # How Open Shortner Link Video Link , Cha
 
 
 # Others
-CACHE_TIME = int(environ.get('CACHE_TIME', 1800))
+CACHE_TIME = int(environ.get('CACHE_TIME', 31536000))  # 1 year in seconds (effectively never expires)
 MAX_B_TN = environ.get("MAX_B_TN", "5")
 PORT = environ.get("PORT", "8080")
 MSG_ALRT = environ.get('MSG_ALRT', 'Hello My Dear Friends ❤️')
@@ -172,7 +172,7 @@ IMDB_TEMPLATE = environ.get("IMDB_TEMPLATE", f"{script.IMDB_TEMPLATE_TXT}")
 MAX_LIST_ELM = environ.get("MAX_LIST_ELM", None)
 
 
-# Choose Option Settings 
+# Choose Option Settings
 LANGUAGES = ["malayalam", "mal", "tamil", "tam" ,"english", "eng", "hindi", "hin", "telugu", "tel", "kannada", "kan"]
 SEASONS = ["season 1", "season 2", "season 3", "season 4", "season 5", "season 6", "season 7", "season 8", "season 9", "season 10"]
 EPISODES = ["E01", "E02", "E03", "E04", "E05", "E06", "E07", "E08", "E09", "E10", "E11", "E12", "E13", "E14", "E15", "E16", "E17", "E18", "E19", "E20", "E21", "E22", "E23", "E24", "E25", "E26", "E27", "E28", "E29", "E30", "E31", "E32", "E33", "E34", "E35", "E36", "E37", "E38", "E39", "E40"]
@@ -196,10 +196,10 @@ if 'DYNO' in environ:
     ON_HEROKU = True
 else:
     ON_HEROKU = False
-# Multiple streaming URLs
+# Multiple streaming URLs through Cloudflare
 STREAM_URLS = [
-    "https://divine-smoke-8290.bdmovieshub.workers.dev/",
-    "https://neil-fvwq.onrender.com"
+    "https://your-cloudflare-domain-1.workers.dev/",
+    "https://your-cloudflare-domain-2.workers.dev/"
 ]
 # Default URL if no specific one is chosen
 URL = STREAM_URLS[0]
