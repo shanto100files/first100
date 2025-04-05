@@ -12,20 +12,20 @@ async def check_stream_limit(user_id, file_size):
     # Check if user has premium access
     if await db.has_premium_access(user_id):
         return True
-        
+
     # For free users - 3GB daily limit
     FREE_LIMIT = 3 * 1024 * 1024 * 1024  # 3GB in bytes
-    
+
     current_size = await db.get_daily_download_size(user_id)
     if current_size + file_size > FREE_LIMIT:
         return False
-        
+
     await db.update_daily_download_size(user_id, file_size)
     return True
 
 async def generate_stream_buttons(client, message, file_id, file_size):
     user_id = message.from_user.id
-    
+
     if await db.has_premium_access(user_id):
         # Premium user - show all buttons
         buttons = [[
@@ -55,28 +55,28 @@ async def generate_stream_buttons(client, message, file_id, file_size):
         ]]
         # Update used quota
         await db.update_daily_download_size(user_id, file_size)
-    
+
     return buttons
 
 @Client.on_message(filters.private & filters.command("stream"))
 async def stream_start(client, message):
     if STREAM_MODE == False:
-        return 
-    
+        return
+
     msg = await client.ask(message.chat.id, "**Now send me your file/video to get stream and download link**")
-    
+
     if not msg.media in [enums.MessageMediaType.VIDEO, enums.MessageMediaType.DOCUMENT]:
         return await message.reply("**Please send me supported media.**")
-        
+
     file = getattr(msg, msg.media.value)
     file_size = file.file_size
-    
+
     # Check stream/download limit for free users
     can_stream = await check_stream_limit(message.from_user.id, file_size)
     if not can_stream:
         remaining_gb = (3 - (await db.get_daily_download_size(message.from_user.id))/(1024*1024*1024))
         text = f"""<b>Daily stream/download limit exceeded!</b>
-        
+
 • Free users can stream/download up to 3GB per day
 • Your remaining quota: {remaining_gb:.2f}GB
 • Buy premium for unlimited streaming/downloading
@@ -86,19 +86,35 @@ Send /plan to see premium plans"""
         return await message.reply_text(text)
 
     filename = file.file_name
-    filesize = humanize.naturalsize(file.file_size) 
+    filesize = humanize.naturalsize(file.file_size)
     fileid = file.file_id
     user_id = message.from_user.id
-    username =  message.from_user.mention 
+    username =  message.from_user.mention
 
     log_msg = await client.send_cached_media(
         chat_id=LOG_CHANNEL,
         file_id=fileid,
     )
-    fileName = {quote_plus(get_name(log_msg))}
-    stream = f"{URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
-    download = f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
- 
+    fileName = quote_plus(get_name(log_msg))
+    file_id = str(log_msg.id)
+    file_hash = get_hash(log_msg)
+
+    # Create permanent links that won't change
+    permanent_id = f"{file_hash}{file_id}" # Combine hash and ID for stability
+
+    # Regular links (may change)
+    stream = f"{URL}watch/{file_id}/{fileName}?hash={file_hash}"
+    download = f"{URL}{file_id}/{fileName}?hash={file_hash}"
+
+    # Permanent links (won't change)
+    # Version with hash (more secure)
+    permanent_stream_with_hash = f"{URL}p/{permanent_id}/{fileName}?hash={file_hash}"
+    permanent_download_with_hash = f"{URL}p/{permanent_id}/{fileName}?hash={file_hash}"
+
+    # Version without hash (simpler to use)
+    permanent_stream = f"{URL}p/{permanent_id}/{fileName}"
+    permanent_download = f"{URL}p/{permanent_id}/{fileName}"
+
     await log_msg.reply_text(
         text=f"•• ʟɪɴᴋ ɢᴇɴᴇʀᴀᴛᴇᴅ ꜰᴏʀ ɪᴅ #{user_id} \n•• ᴜꜱᴇʀɴᴀᴍᴇ : {username} \n\n•• ᖴᎥᒪᗴ Nᗩᗰᗴ : {fileName}",
         quote=True,
@@ -107,12 +123,26 @@ Send /plan to see premium plans"""
             [[
                 InlineKeyboardButton("🚀 Fast Download 🚀", url=download),  # web download Link
                 InlineKeyboardButton('🖥️ Watch online 🖥️', url=stream)   # web stream Link
+            ],[
+                InlineKeyboardButton("♾️ Permanent Download ♾️", url=permanent_download),  # permanent download Link
+                InlineKeyboardButton('♾️ Permanent Stream ♾️', url=permanent_stream)   # permanent stream Link
             ]]
         )
     )
-    buttons = await generate_stream_buttons(client, message, file.file_id, file.file_size)
+    # Create buttons with permanent links
+    buttons = [
+        [
+            InlineKeyboardButton("🚀 Download 🚀", url=download),
+            InlineKeyboardButton('🖥️ Stream 🖥️', url=stream)
+        ],
+        [
+            InlineKeyboardButton("♾️ Permanent Download ♾️", url=permanent_download),
+            InlineKeyboardButton('♾️ Permanent Stream ♾️', url=permanent_stream)
+        ]
+    ]
+
     await message.reply_text(
-        text=f"**Here is your link!\n\n📁 File: {filename}\n📦 Size: {filesize}**",
+        text=f"**Here is your link!\n\n📁 File: {filename}\n📦 Size: {filesize}\n\n❗️ Use Permanent links for long-term access**",
         reply_markup=InlineKeyboardMarkup(buttons)
     )
 
