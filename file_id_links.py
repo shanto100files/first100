@@ -69,8 +69,8 @@ def generate_file_id_links(message):
         encoded_file_name = quote_plus(file_name)
 
         # Create permanent links using file_id
-        permanent_stream = f"{WORKER_URL}/file/{file_id}/{encoded_file_name}"
-        permanent_download = f"{WORKER_URL}/stream/{file_id}/{encoded_file_name}"
+        permanent_stream = f"{WORKER_URL}/stream/{file_id}/{encoded_file_name}"
+        permanent_download = f"{WORKER_URL}/file/{file_id}/{encoded_file_name}"
 
         # Create buttons
         buttons = [
@@ -129,8 +129,8 @@ async def add_file_id_links_to_results(client, query, results):
             encoded_file_name = quote_plus(file_name)
 
             # Create permanent links
-            permanent_stream = f"{WORKER_URL}/file/{file_id}/{encoded_file_name}"
-            permanent_download = f"{WORKER_URL}/stream/{file_id}/{encoded_file_name}"
+            permanent_stream = f"{WORKER_URL}/stream/{file_id}/{encoded_file_name}"
+            permanent_download = f"{WORKER_URL}/file/{file_id}/{encoded_file_name}"
 
             # Add buttons to the result
             result.reply_markup.inline_keyboard.extend([
