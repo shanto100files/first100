@@ -1396,42 +1396,46 @@ Benefits of Premium:
                 "media": "document"
             })
 
-            if links and settings.get('use_permanent_links', True):
-                # Use permanent links that won't expire even if message is deleted
-                permanent_stream = links["stream_link"]
-                permanent_download = links["download_link"]
+            # Try to generate permanent links
+            try:
+                if links and settings.get('use_permanent_links', True):
+                    # Use permanent links that won't expire even if message is deleted
+                    permanent_stream = links["stream_link"]
+                    permanent_download = links["download_link"]
 
-                # Create permanent link URL with file_id
-                permanent_url = f"https://telegram.me/{temp.U_NAME}?start=perm_{file_id}"
+                    # Create permanent link URL with file_id
+                    permanent_url = f"https://telegram.me/{temp.U_NAME}?start=perm_{file_id}"
 
-                # Answer with permanent link that won't expire
+                    # Answer with permanent link that won't expire
+                    if clicked == typed:
+                        await query.answer(url=permanent_url)
+                        return
+                    else:
+                        await query.answer(f"Hᴇʏ {query.from_user.first_name}, Tʜɪs Is Nᴏᴛ Yᴏᴜʀ Mᴏᴠɪᴇ Rᴇǫᴜᴇsᴛ. Rᴇǫᴜᴇsᴛ Yᴏᴜʀ's !", show_alert=True)
+            except Exception as e:
+                logger.error(f"Error with permanent links: {e}")
+                # Continue with traditional method
+            # Fall back to traditional method if permanent links not available
+            if settings['is_shortlink'] and not await db.has_premium_access(query.from_user.id):
                 if clicked == typed:
-                    await query.answer(url=permanent_url)
+                    temp.SHORT[clicked] = query.message.chat.id
+                    await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start=short_{file_id}")
                     return
                 else:
                     await query.answer(f"Hᴇʏ {query.from_user.first_name}, Tʜɪs Is Nᴏᴛ Yᴏᴜʀ Mᴏᴠɪᴇ Rᴇǫᴜᴇsᴛ. Rᴇǫᴜᴇsᴛ Yᴏᴜʀ's !", show_alert=True)
-            else:
-                # Fall back to traditional method if permanent links not available
-                if settings['is_shortlink'] and not await db.has_premium_access(query.from_user.id):
-                    if clicked == typed:
-                        temp.SHORT[clicked] = query.message.chat.id
-                        await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start=short_{file_id}")
-                        return
-                    else:
-                        await query.answer(f"Hᴇʏ {query.from_user.first_name}, Tʜɪs Is Nᴏᴛ Yᴏᴜʀ Mᴏᴠɪᴇ Rᴇǫᴜᴇsᴛ. Rᴇǫᴜᴇsᴛ Yᴏᴜʀ's !", show_alert=True)
-                elif settings['is_shortlink'] and await db.has_premium_access(query.from_user.id):
-                    if clicked == typed:
-                        await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start={ident}_{file_id}")
-                        return
-                    else:
-                        await query.answer(f"Hᴇʏ {query.from_user.first_name}, Tʜɪs Is Nᴏᴛ Yᴏᴜʀ Mᴏᴠɪᴇ Rᴇǫᴜᴇsᴛ. Rᴇǫᴜᴇsᴛ Yᴏᴜʀ's !", show_alert=True)
-
+            elif settings['is_shortlink'] and await db.has_premium_access(query.from_user.id):
+                if clicked == typed:
+                    await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start={ident}_{file_id}")
+                    return
                 else:
-                    if clicked == typed:
-                        await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start={ident}_{file_id}")
-                        return
-                    else:
-                        await query.answer(f"Hᴇʏ {query.from_user.first_name}, Tʜɪs Is Nᴏᴛ Yᴏᴜʀ Mᴏᴠɪᴇ Rᴇǫᴜᴇsᴛ. Rᴇǫᴜᴇsᴛ Yᴏᴜʀ's !", show_alert=True)
+                    await query.answer(f"Hᴇʏ {query.from_user.first_name}, Tʜɪs Is Nᴏᴛ Yᴏᴜʀ Mᴏᴠɪᴇ Rᴇǫᴜᴇsᴛ. Rᴇǫᴜᴇsᴛ Yᴏᴜʀ's !", show_alert=True)
+
+            else:
+                if clicked == typed:
+                    await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start={ident}_{file_id}")
+                    return
+                else:
+                    await query.answer(f"Hᴇʏ {query.from_user.first_name}, Tʜɪs Is Nᴏᴛ Yᴏᴜʀ Mᴏᴠɪᴇ Rᴇǫᴜᴇsᴛ. Rᴇǫᴜᴇsᴛ Yᴏᴜʀ's !", show_alert=True)
         except UserIsBlocked:
             await query.answer('Uɴʙʟᴏᴄᴋ ᴛʜᴇ ʙᴏᴛ ᴍᴀʜɴ !', show_alert=True)
         except PeerIdInvalid:
@@ -1852,42 +1856,54 @@ Benefits of Premium:
     elif query.data.startswith("generate_stream_link"):
         _, file_id = query.data.split(":")
         try:
-            # Generate permanent links using file_id
-            links = generate_file_id_links({
-                "document": {
-                    "file_id": file_id,
-                    "file_name": "video.mp4"
-                },
-                "media": "document"
-            })
+            # First create traditional links as backup (this always works)
+            log_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=file_id)
+            stream = f"{URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
+            download = f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
 
-            if links:
-                # Use permanent links that won't expire even if message is deleted
-                permanent_stream = links["stream_link"]
-                permanent_download = links["download_link"]
+            # Default button with traditional links
+            button = [[
+                InlineKeyboardButton("• ᴅᴏᴡɴʟᴏᴀᴅ •", url=download),
+                InlineKeyboardButton('• ᴡᴀᴛᴄʜ •', url=stream)
+            ],[
+                InlineKeyboardButton("• ᴡᴀᴛᴄʜ ɪɴ ᴡᴇʙ ᴀᴘᴘ •", web_app=WebAppInfo(url=stream))
+            ]]
 
-                button = [[
-                    InlineKeyboardButton("• ᴘᴇʀᴍᴀɴᴇɴᴛ ᴅᴏᴡɴʟᴏᴀᴅ •", url=permanent_download),
-                    InlineKeyboardButton('• ᴘᴇʀᴍᴀɴᴇɴᴛ ᴡᴀᴛᴄʜ •', url=permanent_stream)
-                ],[
-                    InlineKeyboardButton("• ᴡᴀᴛᴄʜ ɪɴ ᴡᴇʙ ᴀᴘᴘ •", web_app=WebAppInfo(url=permanent_stream))
-                ]]
+            # Try to generate permanent links using file_id
+            try:
+                links = generate_file_id_links({
+                    "document": {
+                        "file_id": file_id,
+                        "file_name": "video.mp4"
+                    },
+                    "media": "document"
+                })
 
-                # Also create traditional links as backup
-                log_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=file_id)
-                stream = f"{URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
-                download = f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
+                if links:
+                    # Use permanent links that won't expire even if message is deleted
+                    permanent_stream = links["stream_link"]
+                    permanent_download = links["download_link"]
 
-                # Add traditional links as backup
-                button.append([
-                    InlineKeyboardButton("• ᴀʟᴛᴇʀɴᴀᴛᴇ ᴅᴏᴡɴʟᴏᴀᴅ •", url=download),
-                    InlineKeyboardButton('• ᴀʟᴛᴇʀɴᴀᴛᴇ ᴡᴀᴛᴄʜ •', url=stream)
-                ])
+                    # Add permanent links at the top
+                    button = [[
+                        InlineKeyboardButton("• ᴘᴇʀᴍᴀɴᴇɴᴛ ᴅᴏᴡɴʟᴏᴀᴅ •", url=permanent_download),
+                        InlineKeyboardButton('• ᴘᴇʀᴍᴀɴᴇɴᴛ ᴡᴀᴛᴄʜ •', url=permanent_stream)
+                    ],[
+                        InlineKeyboardButton("• ᴡᴀᴛᴄʜ ɪɴ ᴡᴇʙ ᴀᴘᴘ •", web_app=WebAppInfo(url=permanent_stream))
+                    ],[
+                        InlineKeyboardButton("• ᴀʟᴛᴇʀɴᴀᴛᴇ ᴅᴏᴡɴʟᴏᴀᴅ •", url=download),
+                        InlineKeyboardButton('• ᴀʟᴛᴇʀɴᴀᴛᴇ ᴡᴀᴛᴄʜ •', url=stream)
+                    ]]
+            except Exception as e:
+                # If permanent links generation fails, we still have the traditional links
+                print(f"Error generating permanent links: {e}")
+                # button variable is already defined with traditional links
+
+            # Update the message with the buttons
             await query.message.edit_reply_markup(InlineKeyboardMarkup(button))
         except Exception as e:
             print(e)
             await query.answer(f"something went wrong\n\n{e}", show_alert=True)
-            return
 
     elif query.data == "reqinfo":
         await query.answer(text=script.REQINFO, show_alert=True)
