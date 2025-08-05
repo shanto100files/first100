@@ -29,7 +29,7 @@ AUTH_USERS = (auth_users + ADMINS) if auth_users else []
 LOG_CHANNEL = int(environ.get('LOG_CHANNEL', '-1002634615614'))
 
 # This Is File Channel Where You Upload Your File Then Bot Automatically Save It In Database
-CHANNELS = [int(ch) if id_pattern.search(ch) else ch for ch in environ.get('CHANNELS', '-1002638021400 -1002671899473 -1002607534796 -1002656224546 -1001727315752 -1002603049651 -1002507248656').split()]  # For Multiple Id Use One Space Between Each.
+CHANNELS = [int(ch) if id_pattern.search(ch) else ch for ch in environ.get('CHANNELS', '-1002862485705').split()]  # For Multiple Id Use One Space Between Each.
 
 # auth_channel means force subscribe channel.
 # if REQUEST_TO_JOIN_MODE is true then force subscribe work like request to join fsub, else if false then work like normal fsub.
@@ -245,6 +245,7 @@ REQUEST_FORMAT = """
 BROADCAST_ENABLED = bool(environ.get('BROADCAST_ENABLED', True))
 REQUIRE_BROADCAST_CODE = bool(environ.get('REQUIRE_BROADCAST_CODE', True))
 BROADCAST_CODE = environ.get('BROADCAST_CODE', "bC9#mK2$pQ5")  # Replace with your secret code
+
 
 
 
