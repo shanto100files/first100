@@ -186,7 +186,7 @@ YEARS = ["1900", "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998",
 
 
 # Online Stream and Download
-STREAM_MODE = bool(environ.get('STREAM_MODE', True)) # Set True or False
+STREAM_MODE = bool(environ.get('STREAM_MODE', False)) # Set True or False
 
 # If Stream Mode Is True Then Fill All Required Variable, If False Then Don't Fill.
 MULTI_CLIENT = False
@@ -245,6 +245,7 @@ REQUEST_FORMAT = """
 BROADCAST_ENABLED = bool(environ.get('BROADCAST_ENABLED', True))
 REQUIRE_BROADCAST_CODE = bool(environ.get('REQUIRE_BROADCAST_CODE', True))
 BROADCAST_CODE = environ.get('BROADCAST_CODE', "bC9#mK2$pQ5")  # Replace with your secret code
+
 
 
 
