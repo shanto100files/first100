@@ -136,13 +136,14 @@ async def auto_approve(client, message: ChatJoinRequest):
             if f_caption is None:
                 f_caption = f"{title}"
             try:
-                if STREAM_MODE == True:
+                # Show stream links if STREAM_MODE is True OR user has premium access
+                if STREAM_MODE == True or await db.has_premium_access(message.from_user.id):
                     log_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=msg.get("file_id"))
                     fileName = {quote_plus(get_name(log_msg))}
                     stream = f"{URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
                     download = f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
 
-                if STREAM_MODE == True:
+                if STREAM_MODE == True or await db.has_premium_access(message.from_user.id):
                     can_stream = await check_stream_limit(message.from_user.id, int(msg.get("size", 0)))
                     if not can_stream:
                         # Use direct telegram download button only
@@ -188,7 +189,7 @@ async def auto_approve(client, message: ChatJoinRequest):
         await asyncio.sleep(600)
         for x in filesarr:
             await x.delete()
-        await k.edit_text("<b>✅ ʏᴏᴜʀ ᴍᴇssᴀɢᴇ ɪs sᴜᴄᴄᴇssғᴜʟʟʏ ᴅᴇʟᴇᴛᴇᴅ</b>")  
+        await k.edit_text("<b>✅ আপনার মেসেজ সফলভাবে মুছে ফেলা হয়েছে</b>")  
         return
         
     elif data.split("-", 1)[0] == "DSTORE":
@@ -216,13 +217,14 @@ async def auto_approve(client, message: ChatJoinRequest):
                     except:
                         f_caption = getattr(msg, 'caption', '')
                 file_id = file.file_id
-                if STREAM_MODE == True:
+                # Show stream links if STREAM_MODE is True OR user has premium access
+                if STREAM_MODE == True or await db.has_premium_access(message.from_user.id):
                     log_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=file_id)
                     fileName = {quote_plus(get_name(log_msg))}
                     stream = f"{URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
                     download = f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
  
-                if STREAM_MODE == True:
+                if STREAM_MODE == True or await db.has_premium_access(message.from_user.id):
                     can_stream = await check_stream_limit(message.from_user.id, int(file.file_size))
                     if not can_stream:
                         # Use direct telegram download button only
@@ -264,7 +266,7 @@ async def auto_approve(client, message: ChatJoinRequest):
         await asyncio.sleep(600)
         for x in filesarr:
             await x.delete()
-        await k.edit_text("<b>✅ ʏᴏᴜʀ ᴍᴇssᴀɢᴇ ɪs sᴜᴄᴄᴇssғᴜʟʟʏ ᴅᴇʟᴇᴛᴇᴅ</b>")
+        await k.edit_text("<b>✅ আপনার মেসেজ সফলভাবে মুছে ফেলা হয়েছে</b>")
         return
 
     elif data.split("-", 1)[0] == "verify":
@@ -354,7 +356,8 @@ async def auto_approve(client, message: ChatJoinRequest):
                         reply_markup=InlineKeyboardMarkup(btn)
                     )
                     return
-            if STREAM_MODE == True:
+            # Show stream button if STREAM_MODE is True OR user has premium access
+            if STREAM_MODE == True or await db.has_premium_access(message.from_user.id):
                 button = [[InlineKeyboardButton('sᴛʀᴇᴀᴍ ᴀɴᴅ ᴅᴏᴡɴʟᴏᴀᴅ', callback_data=f'generate_stream_link:{file_id}')]]
                 reply_markup=InlineKeyboardMarkup(button)
             else:
@@ -371,7 +374,7 @@ async def auto_approve(client, message: ChatJoinRequest):
         await asyncio.sleep(600)
         for x in filesarr:
             await x.delete()
-        await k.edit_text("<b>✅ ʏᴏᴜʀ ᴍᴇssᴀɢᴇ ɪs sᴜᴄᴄᴇssғᴜʟʟʏ ᴅᴇʟᴇᴛᴇᴅ</b>")
+        await k.edit_text("<b>✅ আপনার মেসেজ সফলভাবে মুছে ফেলা হয়েছে</b>")
         return    
 
     elif data.startswith("files"):
@@ -418,8 +421,9 @@ async def auto_approve(client, message: ChatJoinRequest):
                         reply_markup=InlineKeyboardMarkup(btn)
                     )
                     return
-            if STREAM_MODE == True:
-                button = [[InlineKeyboardButton('sᴛʀᴇᴀᴍ ᴀɴᴅ ᴅᴏᴡɴʟᴏᴀᴅ', callback_data=f'generate_stream_link:{file_id}')]]
+            # Show stream button if STREAM_MODE is True OR user has premium access
+            if STREAM_MODE == True or await db.has_premium_access(message.from_user.id):
+                button = [[InlineKeyboardButton('sᴛʀᴇᴀᴍ ᴀɴᴅ ᴅᴏᴱɴʟᴏᴀᴅ', callback_data=f'generate_stream_link:{file_id}')]]
                 reply_markup=InlineKeyboardMarkup(button)
             else:
                 reply_markup = None
@@ -477,7 +481,8 @@ async def auto_approve(client, message: ChatJoinRequest):
                 reply_markup=InlineKeyboardMarkup(btn)
             )
             return
-    if STREAM_MODE == True:
+    # Show stream button if STREAM_MODE is True OR user has premium access
+    if STREAM_MODE == True or await db.has_premium_access(message.from_user.id):
         button = [[InlineKeyboardButton('sᴛʀᴇᴀᴍ ᴀɴᴅ ᴅᴏᴡɴʟᴏᴀᴅ', callback_data=f'generate_stream_link:{file_id}')]]
         reply_markup=InlineKeyboardMarkup(button)
     else:
