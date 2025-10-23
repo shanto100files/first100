@@ -251,6 +251,11 @@ PUBLIC_BOT = bool(environ.get('PUBLIC_BOT', False))  # Set True to allow anyone 
 ADMIN_ONLY_MODE = bool(environ.get('ADMIN_ONLY_MODE', True))  # Set True to restrict all commands to admins only
 ALLOW_PREMIUM_COMMANDS = bool(environ.get('ALLOW_PREMIUM_COMMANDS', True))  # Allow premium users to use certain commands
 
+# Group Search Restriction Settings
+RESTRICT_SEARCH_TO_GROUPS = bool(environ.get('RESTRICT_SEARCH_TO_GROUPS', True))  # Set True to restrict search to specific groups only
+ALLOWED_GROUPS = [int(x) for x in environ.get('ALLOWED_GROUPS', '-4631752802').split() if x.lstrip('-').isdigit()]  # List of group IDs where search is allowed
+ALLOW_PM_SEARCH = bool(environ.get('ALLOW_PM_SEARCH', False))  # Set True to allow search in private messages
+
 
 
 
