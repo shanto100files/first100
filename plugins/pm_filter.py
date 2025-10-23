@@ -6,7 +6,7 @@ import os, logging, string, asyncio, time, re, ast, random, math, pytz, pyrogram
 from datetime import datetime, timedelta, date, time
 from Script import script
 from info import *
-from info import RESTRICT_SEARCH_TO_GROUPS, ALLOWED_GROUPS, ALLOW_PM_SEARCH
+from info import RESTRICT_SEARCH_TO_GROUPS, ALLOWED_GROUPS, ALLOW_PM_SEARCH, GROUP_LINKS
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto, ChatPermissions, WebAppInfo
 from pyrogram import Client, filters, enums
 from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerIdInvalid
@@ -87,12 +87,42 @@ async def pm_text(bot, message):
     
     # Check if private message search is allowed
     if RESTRICT_SEARCH_TO_GROUPS and not ALLOW_PM_SEARCH:
-        await message.reply_text(
+        # Create buttons for group links if available
+        buttons = []
+        if GROUP_LINKS:
+            for i, link in enumerate(GROUP_LINKS):
+                if link.startswith('@'):
+                    # Username format
+                    group_url = f"https://t.me/{link[1:]}"
+                    button_text = f"📱 গ্রুপ {i+1}"
+                elif link.startswith('https://t.me/'):
+                    # Full link format
+                    group_url = link
+                    button_text = f"📱 গ্রুপ {i+1}"
+                else:
+                    # Assume it's a username without @
+                    group_url = f"https://t.me/{link}"
+                    button_text = f"📱 গ্রুপ {i+1}"
+                
+                buttons.append([InlineKeyboardButton(button_text, url=group_url)])
+        
+        # Create reply markup if buttons exist
+        reply_markup = InlineKeyboardMarkup(buttons) if buttons else None
+        
+        # Enhanced message with group links
+        message_text = (
             "🚫 **সার্চ নিষিদ্ধ**\n\n"
             "দুঃখিত, এই বটে শুধুমাত্র নির্দিষ্ট গ্রুপে সার্চ করা যায়।\n"
             "প্রাইভেট মেসেজে সার্চ বন্ধ করা আছে।\n\n"
-            "অনুমোদিত গ্রুপে যোগ দিয়ে সার্চ করুন।"
         )
+        
+        if GROUP_LINKS:
+            message_text += "📋 **অনুমোদিত গ্রুপসমূহ:**\n"
+            message_text += "নিচের বাটনে ক্লিক করে গ্রুপে যোগ দিন এবং সার্চ করুন।"
+        else:
+            message_text += "অনুমোদিত গ্রুপে যোগ দিয়ে সার্চ করুন।"
+        
+        await message.reply_text(message_text, reply_markup=reply_markup)
         return
     if PM_SEARCH == True:
         ai_search = True
