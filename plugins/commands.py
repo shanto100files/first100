@@ -553,7 +553,9 @@ async def start(client, message):
                 button = [[InlineKeyboardButton('sᴛʀᴇᴀᴍ ᴀɴᴅ ᴅᴏᴡɴʟᴏᴀᴅ', callback_data=f'generate_stream_link:{file_id}')]]
                 reply_markup=InlineKeyboardMarkup(button)
             else:
-                reply_markup = None
+                # Trial exhausted - show premium upgrade button
+                button = [[InlineKeyboardButton('ট্রায়াল শেষ - প্রিমিয়াম নিন', callback_data='stream_limit')]]
+                reply_markup=InlineKeyboardMarkup(button)
             msg = await client.send_cached_media(
                 chat_id=message.from_user.id,
                 file_id=file_id,
@@ -612,12 +614,20 @@ async def start(client, message):
                         reply_markup=InlineKeyboardMarkup(btn)
                     )
                     return
-            # Show stream button if STREAM_MODE is True OR user has premium access
-            if STREAM_MODE == True or await db.has_premium_access(message.from_user.id):
+            # Show stream button if STREAM_MODE is True OR user has premium access OR free user hasn't exceeded daily limit
+            user_has_premium = await db.has_premium_access(message.from_user.id)
+            free_user_can_stream = False
+            if not user_has_premium:
+                daily_count = await db.get_daily_stream_count(message.from_user.id)
+                free_user_can_stream = daily_count < 2
+            
+            if STREAM_MODE == True or user_has_premium or free_user_can_stream:
                 button = [[InlineKeyboardButton('sᴛʀᴇᴀᴍ ᴀɴᴅ ᴅᴏᴡɴʟᴏᴀᴅ', callback_data=f'generate_stream_link:{file_id}')]]
                 reply_markup=InlineKeyboardMarkup(button)
             else:
-                reply_markup = None
+                # Trial exhausted - show premium upgrade button
+                button = [[InlineKeyboardButton('ট্রায়াল শেষ - প্রিমিয়াম নিন', callback_data='stream_limit')]]
+                reply_markup=InlineKeyboardMarkup(button)
             msg = await client.send_cached_media(
                 chat_id=message.from_user.id,
                 file_id=file_id,
@@ -668,7 +678,9 @@ async def start(client, message):
         button = [[InlineKeyboardButton('sᴛʀᴇᴀᴍ ᴀɴᴅ ᴅᴏᴡɴʟᴏᴀᴅ', callback_data=f'generate_stream_link:{file_id}')]]
         reply_markup=InlineKeyboardMarkup(button)
     else:
-        reply_markup = None
+        # Trial exhausted - show premium upgrade button
+        button = [[InlineKeyboardButton('ট্রায়াল শেষ - প্রিমিয়াম নিন', callback_data='stream_limit')]]
+        reply_markup=InlineKeyboardMarkup(button)
     msg = await client.send_cached_media(
         chat_id=message.from_user.id,
         file_id=file_id,
