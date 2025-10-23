@@ -118,9 +118,9 @@ PUBLIC_FILE_CHANNEL = environ.get('PUBLIC_FILE_CHANNEL', '') # Public Channel Us
 
 
 # Links
-GRP_LNK = environ.get('GRP_LNK', 'https://t.me/buycinepix')
-CHNL_LNK = environ.get('CHNL_LNK', 'https://t.me/banglamovieseries')
-SUPPORT_CHAT = environ.get('SUPPORT_CHAT', 'buycinepix') # Support Chat Link Without https:// or @
+GRP_LNK = environ.get('GRP_LNK', 'https://t.me/cinepix_movies')
+CHNL_LNK = environ.get('CHNL_LNK', 'https://t.me/cinemaze_1')
+SUPPORT_CHAT = environ.get('SUPPORT_CHAT', 'cinepix_movies') # Support Chat Link Without https:// or @
 OWNER_LNK = environ.get('OWNER_LNK', 'https://t.me/neil_0998')
 
 # True Or False
@@ -245,6 +245,7 @@ REQUEST_FORMAT = """
 BROADCAST_ENABLED = bool(environ.get('BROADCAST_ENABLED', True))
 REQUIRE_BROADCAST_CODE = bool(environ.get('REQUIRE_BROADCAST_CODE', True))
 BROADCAST_CODE = environ.get('BROADCAST_CODE', "bC9#mK2$pQ5")  # Replace with your secret code
+
 
 
 
