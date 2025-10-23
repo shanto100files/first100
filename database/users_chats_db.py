@@ -338,6 +338,71 @@ class Database:
     async def get_save(self, id):
         user = await self.col.find_one({'id': int(id)})
         return user.get('save', False) 
+
+    # Daily stream count tracking for free users
+    async def get_daily_stream_count(self, user_id):
+        """Get today's stream count for a user"""
+        today = datetime.datetime.now().strftime('%Y-%m-%d')
+        user = await self.col.find_one({'id': int(user_id)})
+        if not user:
+            return 0
+        
+        daily_streams = user.get('daily_streams', {})
+        return daily_streams.get(today, 0)
+
+    async def increment_daily_stream_count(self, user_id):
+        """Increment today's stream count for a user"""
+        today = datetime.datetime.now().strftime('%Y-%m-%d')
+        user = await self.col.find_one({'id': int(user_id)})
+        
+        if not user:
+            # Create user if doesn't exist
+            await self.add_user(user_id)
+            daily_streams = {today: 1}
+        else:
+            daily_streams = user.get('daily_streams', {})
+            daily_streams[today] = daily_streams.get(today, 0) + 1
+        
+        await self.col.update_one(
+            {'id': int(user_id)}, 
+            {'$set': {'daily_streams': daily_streams}}
+        )
+
+    async def reset_daily_stream_count(self, user_id):
+        """Reset today's stream count for a user"""
+        today = datetime.datetime.now().strftime('%Y-%m-%d')
+        await self.col.update_one(
+            {'id': int(user_id)}, 
+            {'$unset': {f'daily_streams.{today}': ""}}
+        )
+
+    # Legacy functions for backward compatibility (currently using file size tracking)
+    async def get_daily_download_size(self, user_id):
+        """Get today's download size for a user"""
+        today = datetime.datetime.now().strftime('%Y-%m-%d')
+        user = await self.col.find_one({'id': int(user_id)})
+        if not user:
+            return 0
+        
+        daily_downloads = user.get('daily_downloads', {})
+        return daily_downloads.get(today, 0)
+
+    async def update_daily_download_size(self, user_id, file_size):
+        """Update today's download size for a user"""
+        today = datetime.datetime.now().strftime('%Y-%m-%d')
+        user = await self.col.find_one({'id': int(user_id)})
+        
+        if not user:
+            await self.add_user(user_id)
+            daily_downloads = {today: file_size}
+        else:
+            daily_downloads = user.get('daily_downloads', {})
+            daily_downloads[today] = daily_downloads.get(today, 0) + file_size
+        
+        await self.col.update_one(
+            {'id': int(user_id)}, 
+            {'$set': {'daily_downloads': daily_downloads}}
+        )
     
 
 db = Database(USER_DB_URI, DATABASE_NAME)
