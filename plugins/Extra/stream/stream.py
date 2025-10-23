@@ -1,13 +1,12 @@
 from pyrogram import Client, filters, enums
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ForceReply, CallbackQuery, WebAppInfo
-from info import STREAM_MODE, URL, LOG_CHANNEL, VERIFY, VERIFY_TUTORIAL
+from info import STREAM_MODE, URL, LOG_CHANNEL
 from urllib.parse import quote_plus
 from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
 from TechVJ.util.human_readable import humanbytes
 import humanize
 import random
 from database.users_chats_db import db
-from utils import check_verification, get_token, temp
 
 async def check_stream_limit(user_id, file_size):
     # Check if user has premium access
@@ -24,69 +23,45 @@ async def check_stream_limit(user_id, file_size):
     await db.update_daily_download_size(user_id, file_size)
     return True
 
-async def generate_stream_buttons(client, message, file_id, file_size, download_link=None, stream_link=None):
+async def generate_stream_buttons(client, message, file_id, file_size):
     user_id = message.from_user.id
 
     if await db.has_premium_access(user_id):
         # Premium user - show all buttons
-        if download_link and stream_link:
-            buttons = [[
-                InlineKeyboardButton("• ᴅᴏᴡɴʟᴏᴀᴅ •", url=download_link),
-                InlineKeyboardButton('• ᴡᴀᴛᴄʜ •', url=stream_link)
-            ],[
-                InlineKeyboardButton("• ᴡᴀᴛᴄʜ ɪɴ ᴡᴇʙ ᴀᴘᴘ •", web_app=WebAppInfo(url=stream_link))
-            ]]
-            return buttons
-
-    # Check token verification for stream/download access (non-premium users)
-    if not await check_verification(client, user_id) and VERIFY == True:
         buttons = [[
-            InlineKeyboardButton("🔐 ᴠᴇʀɪꜰʏ ғᴏʀ sᴛʀᴇᴀᴍ/ᴅᴏᴡɴʟᴏᴀᴅ", url=await get_token(client, user_id, f"https://telegram.me/{temp.U_NAME}?start="))
+            InlineKeyboardButton("• ᴅᴏᴡɴʟᴏᴀᴅ •", url=download_link),
+            InlineKeyboardButton('• ᴡᴀᴛᴄʜ •', url=stream_link)
+        ],[
+            InlineKeyboardButton("• ᴡᴀᴛᴄʜ ɪɴ ᴡᴇʙ ᴀᴘᴘ •", web_app=WebAppInfo(url=stream_link))
         ]]
         return buttons
 
     # Free user - check daily limit
     current_size = await db.get_daily_download_size(user_id)
     FREE_LIMIT = 3 * 1024 * 1024 * 1024  # 3GB
-    
+
     if current_size + file_size > FREE_LIMIT:
-        # Show premium upgrade button
+        # Limit exceeded - show premium message button
         buttons = [[
-            InlineKeyboardButton("💎 ɢᴇᴛ ᴘʀᴇᴍɪᴜᴍ", callback_data="premium_info")
+            InlineKeyboardButton("💫 ᴡᴀᴛᴄʜ/ᴅᴏᴡɴʟᴏᴀᴅ 💫", callback_data="stream_limit")
         ]]
-        return buttons
-    
-    # Free user within limit - show stream/download buttons
-    if download_link and stream_link:
+    else:
+        # Within limit - show normal buttons
         buttons = [[
             InlineKeyboardButton("• ᴅᴏᴡɴʟᴏᴀᴅ •", url=download_link),
             InlineKeyboardButton('• ᴡᴀᴛᴄʜ •', url=stream_link)
+        ],[
+            InlineKeyboardButton("• ᴡᴀᴛᴄʜ ɪɴ ᴡᴇʙ ᴀᴘᴘ •", web_app=WebAppInfo(url=stream_link))
         ]]
-        return buttons
-    
-    # Default fallback
-    return [[InlineKeyboardButton("❌ ᴇʀʀᴏʀ", callback_data="error")]]
+        # Update used quota
+        await db.update_daily_download_size(user_id, file_size)
+
+    return buttons
 
 @Client.on_message(filters.private & filters.command("stream"))
 async def stream_start(client, message):
     if STREAM_MODE == False:
         return
-
-    # Check token verification for stream/download access (except premium users)
-    if not await db.has_premium_access(message.from_user.id):
-        if not await check_verification(client, message.from_user.id) and VERIFY == True:
-            btn = [[
-                InlineKeyboardButton("🔐 ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ғᴏʀ sᴛʀᴇᴀᴍ", url=await get_token(client, message.from_user.id, f"https://telegram.me/{temp.U_NAME}?start="))
-            ],[
-                InlineKeyboardButton("ʜᴏᴡ ᴛᴏ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ", url=VERIFY_TUTORIAL)
-            ]]
-            text = "<b>🔒 sᴛʀᴇᴀᴍ & ᴅᴏᴡɴʟᴏᴀᴅ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ʀᴇǫᴜɪʀᴇᴅ!\n\nʏᴏᴜ ɴᴇᴇᴅ ᴛᴏ ᴠᴇʀɪꜰʏ ʏᴏᴜʀsᴇʟꜰ ᴛᴏ ᴀᴄᴄᴇss sᴛʀᴇᴀᴍ & ᴅᴏᴡɴʟᴏᴀᴅ ғᴇᴀᴛᴜʀᴇs.\n\n⏰ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ᴠᴀʟɪᴅ ғᴏʀ 12 ʜᴏᴜʀs\n\n💡 ɴᴏᴛᴇ: ᴅɪʀᴇᴄᴛ ғɪʟᴇ ᴀᴄᴄᴇss ɪs sᴛɪʟʟ ғʀᴇᴇ!</b>"
-            await message.reply_text(
-                text=text,
-                protect_content=True,
-                reply_markup=InlineKeyboardMarkup(btn)
-            )
-            return
 
     msg = await client.ask(message.chat.id, "**Now send me your file/video to get stream and download link**")
 
@@ -154,8 +129,17 @@ Send /plan to see premium plans"""
             ]]
         )
     )
-    # Generate buttons using the function
-    buttons = await generate_stream_buttons(client, message, fileid, file.file_size, permanent_download, permanent_stream)
+    # Create buttons with permanent links
+    buttons = [
+        [
+            InlineKeyboardButton("🚀 Download 🚀", url=download),
+            InlineKeyboardButton('🖥️ Stream 🖥️', url=stream)
+        ],
+        [
+            InlineKeyboardButton("♾️ Permanent Download ♾️", url=permanent_download),
+            InlineKeyboardButton('♾️ Permanent Stream ♾️', url=permanent_stream)
+        ]
+    ]
 
     await message.reply_text(
         text=f"**Here is your link!\n\n📁 File: {filename}\n📦 Size: {filesize}\n\n❗️ Use Permanent links for long-term access**",
