@@ -143,8 +143,8 @@ USE_CAPTION_FILTER = bool(environ.get('USE_CAPTION_FILTER', True))
 
 # Token Verification Info :
 VERIFY = bool(environ.get('VERIFY', False))
-VERIFY_SHORTLINK_URL = environ.get('VERIFY_SHORTLINK_URL', '')
-VERIFY_SHORTLINK_API = environ.get('VERIFY_SHORTLINK_API', '')
+SHORTLINK_URL = environ.get('SHORTLINK_URL', 'shortlink.cinepix.top')
+SHORTLINK_API = environ.get('SHORTLINK_API', 'c8fd230ca40587a1bb136a138b2066a62d91b1fa')
 VERIFY_TUTORIAL = environ.get('VERIFY_TUTORIAL', '')
 
 # If You Fill Second Shortner Then Bot Attach Both First And Second Shortner And Use It For Verify.
@@ -245,6 +245,7 @@ REQUEST_FORMAT = """
 BROADCAST_ENABLED = bool(environ.get('BROADCAST_ENABLED', True))
 REQUIRE_BROADCAST_CODE = bool(environ.get('REQUIRE_BROADCAST_CODE', True))
 BROADCAST_CODE = environ.get('BROADCAST_CODE', "bC9#mK2$pQ5")  # Replace with your secret code
+
 
 
 
