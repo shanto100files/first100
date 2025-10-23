@@ -10,7 +10,7 @@ from pyrogram.types import *
 from database.ia_filterdb import col, sec_col, get_file_details, unpack_new_file_id, get_bad_files
 from database.users_chats_db import db, delete_all_referal_users, get_referal_users_count, get_referal_all_users, referal_add_user
 from database.join_reqs import JoinReqs
-from info import CLONE_MODE, OWNER_LNK, REACTIONS, CHANNELS, REQUEST_TO_JOIN_MODE, TRY_AGAIN_BTN, ADMINS, SHORTLINK_MODE, PREMIUM_AND_REFERAL_MODE, STREAM_MODE, AUTH_CHANNEL, REFERAL_PREMEIUM_TIME, REFERAL_COUNT, PAYMENT_TEXT, PAYMENT_QR, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, CHNL_LNK, GRP_LNK, REQST_CHANNEL, SUPPORT_CHAT, MAX_B_TN, VERIFY, SHORTLINK_API, SHORTLINK_URL, TUTORIAL, VERIFY_TUTORIAL, IS_TUTORIAL, URL, PUBLIC_BOT, ADMIN_ONLY_MODE
+from info import CLONE_MODE, OWNER_LNK, REACTIONS, CHANNELS, REQUEST_TO_JOIN_MODE, TRY_AGAIN_BTN, ADMINS, SHORTLINK_MODE, PREMIUM_AND_REFERAL_MODE, STREAM_MODE, AUTH_CHANNEL, REFERAL_PREMEIUM_TIME, REFERAL_COUNT, PAYMENT_TEXT, PAYMENT_QR, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, CHNL_LNK, GRP_LNK, REQST_CHANNEL, SUPPORT_CHAT, MAX_B_TN, VERIFY, SHORTLINK_API, SHORTLINK_URL, TUTORIAL, VERIFY_TUTORIAL, IS_TUTORIAL, URL, PUBLIC_BOT, ADMIN_ONLY_MODE, RESTRICT_SEARCH_TO_GROUPS, ALLOWED_GROUPS, ALLOW_PM_SEARCH
 from utils import get_settings, pub_is_subscribed, get_size, is_subscribed, save_group_settings, temp, verify_user, check_token, check_verification, get_token, get_shortlink, get_tutorial, get_seconds, is_authorized_user, check_group_admin
 from database.connections_mdb import active_connection
 from urllib.parse import quote_plus
@@ -1557,3 +1557,143 @@ async def purge_requests(client, message):
             parse_mode=enums.ParseMode.MARKDOWN,
             disable_web_page_preview=True
         )
+
+# Group Management Commands for Search Restrictions
+@Client.on_message(filters.command("allowedgroups") & filters.private & filters.user(ADMINS))
+async def show_allowed_groups(client, message):
+    """Show list of allowed groups for search"""
+    if not RESTRICT_SEARCH_TO_GROUPS:
+        await message.reply_text("🔓 Search restriction is currently disabled. All groups can search.")
+        return
+    
+    if not ALLOWED_GROUPS:
+        await message.reply_text("📝 No groups are currently allowed for search.")
+        return
+    
+    groups_text = "📋 **Allowed Groups for Search:**\n\n"
+    for i, group_id in enumerate(ALLOWED_GROUPS, 1):
+        try:
+            chat = await client.get_chat(group_id)
+            groups_text += f"{i}. {chat.title} (`{group_id}`)\n"
+        except:
+            groups_text += f"{i}. Unknown Group (`{group_id}`)\n"
+    
+    groups_text += f"\n🔒 Private Message Search: {'Enabled' if ALLOW_PM_SEARCH else 'Disabled'}"
+    await message.reply_text(groups_text)
+
+@Client.on_message(filters.command("addgroup") & filters.private & filters.user(ADMINS))
+async def add_allowed_group(client, message):
+    """Add a group to allowed list"""
+    if len(message.command) < 2:
+        await message.reply_text("❌ Please provide group ID.\n\nUsage: `/addgroup -1001234567890`")
+        return
+    
+    try:
+        group_id = int(message.command[1])
+    except ValueError:
+        await message.reply_text("❌ Invalid group ID. Please provide a valid numeric group ID.")
+        return
+    
+    # Check if group exists
+    try:
+        chat = await client.get_chat(group_id)
+        group_name = chat.title
+    except:
+        await message.reply_text("❌ Could not find group with this ID. Make sure the bot is added to the group.")
+        return
+    
+    # Add to environment variable (this is temporary, you may want to use database)
+    if group_id not in ALLOWED_GROUPS:
+        ALLOWED_GROUPS.append(group_id)
+        await message.reply_text(f"✅ Group **{group_name}** (`{group_id}`) has been added to allowed groups list.")
+    else:
+        await message.reply_text(f"ℹ️ Group **{group_name}** (`{group_id}`) is already in the allowed groups list.")
+
+@Client.on_message(filters.command("removegroup") & filters.private & filters.user(ADMINS))
+async def remove_allowed_group(client, message):
+    """Remove a group from allowed list"""
+    if len(message.command) < 2:
+        await message.reply_text("❌ Please provide group ID.\n\nUsage: `/removegroup -1001234567890`")
+        return
+    
+    try:
+        group_id = int(message.command[1])
+    except ValueError:
+        await message.reply_text("❌ Invalid group ID. Please provide a valid numeric group ID.")
+        return
+    
+    if group_id in ALLOWED_GROUPS:
+        ALLOWED_GROUPS.remove(group_id)
+        await message.reply_text(f"✅ Group (`{group_id}`) has been removed from allowed groups list.")
+    else:
+        await message.reply_text(f"ℹ️ Group (`{group_id}`) is not in the allowed groups list.")
+
+@Client.on_message(filters.command("togglesearch") & filters.private & filters.user(ADMINS))
+async def toggle_search_restriction(client, message):
+    """Toggle search restriction on/off"""
+    global RESTRICT_SEARCH_TO_GROUPS
+    RESTRICT_SEARCH_TO_GROUPS = not RESTRICT_SEARCH_TO_GROUPS
+    
+    status = "enabled" if RESTRICT_SEARCH_TO_GROUPS else "disabled"
+    await message.reply_text(f"🔄 Search restriction has been **{status}**.")
+
+@Client.on_message(filters.command("togglepm") & filters.private & filters.user(ADMINS))
+async def toggle_pm_search(client, message):
+    """Toggle private message search on/off"""
+    global ALLOW_PM_SEARCH
+    ALLOW_PM_SEARCH = not ALLOW_PM_SEARCH
+    
+    status = "enabled" if ALLOW_PM_SEARCH else "disabled"
+    await message.reply_text(f"🔄 Private message search has been **{status}**.")
+
+@Client.on_message(filters.command("searchhelp") & filters.private & filters.user(ADMINS))
+async def search_help(client, message):
+    """Show help for search management commands"""
+    help_text = """🔧 **Search Management Commands:**
+
+📋 `/allowedgroups` - Show list of allowed groups
+➕ `/addgroup <group_id>` - Add group to allowed list
+➖ `/removegroup <group_id>` - Remove group from allowed list
+🔄 `/togglesearch` - Enable/disable search restrictions
+💬 `/togglepm` - Enable/disable private message search
+❓ `/searchhelp` - Show this help message
+
+**Current Status:**
+🔒 Search Restriction: """ + ("Enabled" if RESTRICT_SEARCH_TO_GROUPS else "Disabled") + """
+💬 PM Search: """ + ("Enabled" if ALLOW_PM_SEARCH else "Disabled") + """
+📊 Allowed Groups: """ + str(len(ALLOWED_GROUPS)) + """
+
+**Note:** Changes are temporary and will reset on bot restart. For permanent changes, update the info.py file."""
+    
+    await message.reply_text(help_text)
+
+@Client.on_message(filters.command("groupid") & filters.user(ADMINS))
+async def get_group_id(client, message):
+    """Get current chat/group ID and information"""
+    chat = message.chat
+    
+    if chat.type == enums.ChatType.PRIVATE:
+        await message.reply_text(f"🔹 **Chat Type:** Private Message\n🆔 **Your User ID:** `{chat.id}`")
+    elif chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
+        group_info = f"""📊 **Group Information:**
+
+🏷️ **Group Name:** {chat.title}
+🆔 **Group ID:** `{chat.id}`
+👥 **Chat Type:** {chat.type.name}
+👤 **Members Count:** {await client.get_chat_members_count(chat.id) if hasattr(client, 'get_chat_members_count') else 'Unknown'}
+
+📋 **To add this group to allowed list, use:**
+`/addgroup {chat.id}`"""
+        
+        await message.reply_text(group_info)
+    elif chat.type == enums.ChatType.CHANNEL:
+        channel_info = f"""📺 **Channel Information:**
+
+🏷️ **Channel Name:** {chat.title}
+🆔 **Channel ID:** `{chat.id}`
+📡 **Chat Type:** {chat.type.name}
+
+📋 **To add this channel to allowed list, use:**
+`/addgroup {chat.id}`"""
+        
+        await message.reply_text(channel_info)
