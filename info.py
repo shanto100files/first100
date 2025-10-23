@@ -253,7 +253,7 @@ ALLOW_PREMIUM_COMMANDS = bool(environ.get('ALLOW_PREMIUM_COMMANDS', True))  # Al
 
 # Group Search Restriction Settings
 RESTRICT_SEARCH_TO_GROUPS = bool(environ.get('RESTRICT_SEARCH_TO_GROUPS', True))  # Set True to restrict search to specific groups only
-ALLOWED_GROUPS = [int(x) for x in environ.get('ALLOWED_GROUPS', '-4631752802').split() if x.lstrip('-').isdigit()]  # List of group IDs where search is allowed
+ALLOWED_GROUPS = [int(x) for x in environ.get('ALLOWED_GROUPS', '-1003243216251').split() if x.lstrip('-').isdigit()]  # List of group IDs where search is allowed
 
 # Group invite links corresponding to ALLOWED_GROUPS (same order)
 # Example: GROUP_LINKS = ["https://t.me/+AbCdEfGhIjKlMnOp", "https://t.me/group2"]
@@ -261,6 +261,7 @@ ALLOWED_GROUPS = [int(x) for x in environ.get('ALLOWED_GROUPS', '-4631752802').s
 GROUP_LINKS = [x.strip() for x in environ.get('GROUP_LINKS', '@movie_requests_bd').split(',') if x.strip()]  # List of group invite links
 
 ALLOW_PM_SEARCH = bool(environ.get('ALLOW_PM_SEARCH', False))  # Set True to allow search in private messages
+
 
 
 
