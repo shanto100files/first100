@@ -13,14 +13,15 @@ async def check_stream_limit(user_id, file_size):
     if await db.has_premium_access(user_id):
         return True
 
-    # For free users - 3GB daily limit
-    FREE_LIMIT = 3 * 1024 * 1024 * 1024  # 3GB in bytes
-
-    current_size = await db.get_daily_download_size(user_id)
-    if current_size + file_size > FREE_LIMIT:
+    # For free users - 2 stream requests per day
+    FREE_STREAM_LIMIT = 2
+    
+    current_count = await db.get_daily_stream_count(user_id)
+    if current_count >= FREE_STREAM_LIMIT:
         return False
 
-    await db.update_daily_download_size(user_id, file_size)
+    # Increment the stream count
+    await db.increment_daily_stream_count(user_id)
     return True
 
 async def generate_stream_buttons(client, message, file_id, file_size):
@@ -71,18 +72,29 @@ async def stream_start(client, message):
     file = getattr(msg, msg.media.value)
     file_size = file.file_size
 
-    # Check stream/download limit for free users
+    # Check stream limit for free users
     can_stream = await check_stream_limit(message.from_user.id, file_size)
     if not can_stream:
-        remaining_gb = (3 - (await db.get_daily_download_size(message.from_user.id))/(1024*1024*1024))
-        text = f"""<b>Daily stream/download limit exceeded!</b>
+        current_count = await db.get_daily_stream_count(message.from_user.id)
+        text = f"""<b>🚫 Daily Stream Limit Exceeded!</b>
 
-• Free users can stream/download up to 3GB per day
-• Your remaining quota: {remaining_gb:.2f}GB
-• Buy premium for unlimited streaming/downloading
-• You can still download directly from bot without limits
+📊 <b>Your Usage Today:</b> {current_count}/2 streams used
 
-Send /plan to see premium plans"""
+🎯 <b>Free User Limitations:</b>
+• Only 2 stream requests per day
+• Limited access to premium features
+
+💎 <b>Upgrade to Premium for:</b>
+• ♾️ Unlimited streaming
+• 🚀 Faster download speeds  
+• 📱 Priority support
+• 🎬 HD quality streaming
+• 📂 No file size limits
+
+👨‍💼 <b>Contact Admin to Get Premium:</b>
+Send /plan to see premium plans or contact @YourAdminUsername
+
+⏰ <b>Your limit will reset tomorrow!</b>"""
         return await message.reply_text(text)
 
     filename = file.file_name
