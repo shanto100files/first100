@@ -10,7 +10,7 @@ from pyrogram.types import *
 from database.ia_filterdb import col, sec_col, get_file_details, unpack_new_file_id, get_bad_files
 from database.users_chats_db import db, delete_all_referal_users, get_referal_users_count, get_referal_all_users, referal_add_user
 from database.join_reqs import JoinReqs
-from info import CLONE_MODE, OWNER_LNK, REACTIONS, CHANNELS, REQUEST_TO_JOIN_MODE, TRY_AGAIN_BTN, ADMINS, SHORTLINK_MODE, PREMIUM_AND_REFERAL_MODE, STREAM_MODE, AUTH_CHANNEL, REFERAL_PREMEIUM_TIME, REFERAL_COUNT, PAYMENT_TEXT, PAYMENT_QR, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, CHNL_LNK, GRP_LNK, REQST_CHANNEL, SUPPORT_CHAT, MAX_B_TN, VERIFY, SHORTLINK_API, SHORTLINK_URL, TUTORIAL, VERIFY_TUTORIAL, IS_TUTORIAL, URL, PUBLIC_BOT, ADMIN_ONLY_MODE, RESTRICT_SEARCH_TO_GROUPS, ALLOWED_GROUPS, ALLOW_PM_SEARCH
+from info import CLONE_MODE, OWNER_LNK, REACTIONS, CHANNELS, REQUEST_TO_JOIN_MODE, TRY_AGAIN_BTN, ADMINS, SHORTLINK_MODE, PREMIUM_AND_REFERAL_MODE, STREAM_MODE, AUTH_CHANNEL, REFERAL_PREMEIUM_TIME, REFERAL_COUNT, PAYMENT_TEXT, PAYMENT_QR, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, CHNL_LNK, GRP_LNK, REQST_CHANNEL, SUPPORT_CHAT, MAX_B_TN, VERIFY, SHORTLINK_API, SHORTLINK_URL, TUTORIAL, VERIFY_TUTORIAL, IS_TUTORIAL, URL, PUBLIC_BOT, ADMIN_ONLY_MODE, RESTRICT_SEARCH_TO_GROUPS, ALLOWED_GROUPS, ALLOW_PM_SEARCH, GROUP_LINKS
 from utils import get_settings, pub_is_subscribed, get_size, is_subscribed, save_group_settings, temp, verify_user, check_token, check_verification, get_token, get_shortlink, get_tutorial, get_seconds, is_authorized_user, check_group_admin
 from database.connections_mdb import active_connection
 from urllib.parse import quote_plus
@@ -1651,9 +1651,19 @@ async def search_help(client, message):
     """Show help for search management commands"""
     help_text = """🔧 **Search Management Commands:**
 
+**Group Management:**
 📋 `/allowedgroups` - Show list of allowed groups
 ➕ `/addgroup <group_id>` - Add group to allowed list
 ➖ `/removegroup <group_id>` - Remove group from allowed list
+🆔 `/groupid` - Get current group ID
+
+**Group Links Management:**
+🔗 `/grouplinks` - Show current group links
+➕ `/addlink <link>` - Add group invite link
+➖ `/removelink <number/link>` - Remove group link
+❓ `/linkhelp` - Group link management help
+
+**Search Settings:**
 🔄 `/togglesearch` - Enable/disable search restrictions
 💬 `/togglepm` - Enable/disable private message search
 ❓ `/searchhelp` - Show this help message
@@ -1662,6 +1672,7 @@ async def search_help(client, message):
 🔒 Search Restriction: """ + ("Enabled" if RESTRICT_SEARCH_TO_GROUPS else "Disabled") + """
 💬 PM Search: """ + ("Enabled" if ALLOW_PM_SEARCH else "Disabled") + """
 📊 Allowed Groups: """ + str(len(ALLOWED_GROUPS)) + """
+🔗 Group Links: """ + str(len(GROUP_LINKS)) + """
 
 **Note:** Changes are temporary and will reset on bot restart. For permanent changes, update the info.py file."""
     
@@ -1697,3 +1708,111 @@ async def get_group_id(client, message):
 `/addgroup {chat.id}`"""
         
         await message.reply_text(channel_info)
+
+# Group Links Management Commands
+@Client.on_message(filters.command("grouplinks") & filters.user(ADMINS))
+async def show_group_links(client, message):
+    """Show current group links"""
+    if not GROUP_LINKS:
+        await message.reply_text("📋 **গ্রুপ লিংক তালিকা খালি**\n\nকোনো গ্রুপ লিংক যোগ করা হয়নি।")
+        return
+    
+    links_text = "📋 **বর্তমান গ্রুপ লিংকসমূহ:**\n\n"
+    for i, link in enumerate(GROUP_LINKS, 1):
+        links_text += f"{i}. {link}\n"
+    
+    links_text += f"\n📊 **মোট লিংক:** {len(GROUP_LINKS)}"
+    await message.reply_text(links_text)
+
+@Client.on_message(filters.command("addlink") & filters.user(ADMINS))
+async def add_group_link(client, message):
+    """Add a new group link"""
+    if len(message.command) < 2:
+        await message.reply_text(
+            "❌ **ভুল ফরম্যাট!**\n\n"
+            "**ব্যবহার:** `/addlink <group_link>`\n\n"
+            "**উদাহরণ:**\n"
+            "• `/addlink https://t.me/+AbCdEfGhIjKlMnOp`\n"
+            "• `/addlink @moviegroup`\n"
+            "• `/addlink moviegroup`"
+        )
+        return
+    
+    link = message.command[1]
+    
+    # Validate link format
+    if not (link.startswith('https://t.me/') or link.startswith('@') or link.replace('@', '').replace('_', '').isalnum()):
+        await message.reply_text(
+            "❌ **অবৈধ লিংক ফরম্যাট!**\n\n"
+            "**সঠিক ফরম্যাট:**\n"
+            "• `https://t.me/+AbCdEfGhIjKlMnOp`\n"
+            "• `@groupname`\n"
+            "• `groupname`"
+        )
+        return
+    
+    if link in GROUP_LINKS:
+        await message.reply_text(f"⚠️ **এই লিংক ইতিমধ্যে যোগ করা আছে:** {link}")
+        return
+    
+    GROUP_LINKS.append(link)
+    await message.reply_text(f"✅ **গ্রুপ লিংক সফলভাবে যোগ করা হয়েছে!**\n\n📎 **লিংক:** {link}")
+
+@Client.on_message(filters.command("removelink") & filters.user(ADMINS))
+async def remove_group_link(client, message):
+    """Remove a group link"""
+    if len(message.command) < 2:
+        await message.reply_text(
+            "❌ **ভুল ফরম্যাট!**\n\n"
+            "**ব্যবহার:** `/removelink <link_number_or_link>`\n\n"
+            "**উদাহরণ:**\n"
+            "• `/removelink 1` (প্রথম লিংক সরাতে)\n"
+            "• `/removelink @moviegroup`"
+        )
+        return
+    
+    if not GROUP_LINKS:
+        await message.reply_text("📋 **গ্রুপ লিংক তালিকা খালি**\n\nকোনো গ্রুপ লিংক যোগ করা হয়নি।")
+        return
+    
+    identifier = message.command[1]
+    
+    # Try to remove by index
+    if identifier.isdigit():
+        index = int(identifier) - 1
+        if 0 <= index < len(GROUP_LINKS):
+            removed_link = GROUP_LINKS.pop(index)
+            await message.reply_text(f"✅ **গ্রুপ লিংক সফলভাবে সরানো হয়েছে!**\n\n📎 **সরানো লিংক:** {removed_link}")
+        else:
+            await message.reply_text(f"❌ **অবৈধ ইনডেক্স!** দয়া করে 1 থেকে {len(GROUP_LINKS)} এর মধ্যে একটি নম্বর দিন।")
+    else:
+        # Try to remove by link
+        if identifier in GROUP_LINKS:
+            GROUP_LINKS.remove(identifier)
+            await message.reply_text(f"✅ **গ্রুপ লিংক সফলভাবে সরানো হয়েছে!**\n\n📎 **সরানো লিংক:** {identifier}")
+        else:
+            await message.reply_text(f"❌ **লিংক খুঁজে পাওয়া যায়নি:** {identifier}")
+
+@Client.on_message(filters.command("linkhelp") & filters.user(ADMINS))
+async def group_link_help(client, message):
+    """Show help for group link management commands"""
+    help_text = """🔗 **গ্রুপ লিংক ম্যানেজমেন্ট সাহায্য**
+
+📋 **উপলব্ধ কমান্ডসমূহ:**
+
+🔍 `/grouplinks` - বর্তমান গ্রুপ লিংক তালিকা দেখুন
+➕ `/addlink <link>` - নতুন গ্রুপ লিংক যোগ করুন
+➖ `/removelink <number/link>` - গ্রুপ লিংক সরান
+❓ `/linkhelp` - এই সাহায্য মেসেজ
+
+📝 **লিংক ফরম্যাট:**
+• `https://t.me/+AbCdEfGhIjKlMnOp` (ইনভাইট লিংক)
+• `@groupname` (ইউজারনেম)
+• `groupname` (শুধু নাম)
+
+⚠️ **গুরুত্বপূর্ণ:**
+• গ্রুপ লিংকের ক্রম ALLOWED_GROUPS এর সাথে মিলিয়ে রাখুন
+• প্রতিটি গ্রুপ ID এর জন্য একটি করে লিংক যোগ করুন
+• লিংক যোগ/সরানোর পর বট রিস্টার্ট করার প্রয়োজন নেই"""
+
+    await message.reply_text(help_text)
