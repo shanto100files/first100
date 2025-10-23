@@ -10,7 +10,7 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQ
 from pyrogram import Client, filters, enums
 from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerIdInvalid
 from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty
-from utils import get_size, is_subscribed, pub_is_subscribed, get_poster, search_gagala, temp, get_settings, save_group_settings, get_shortlink, get_tutorial, send_all, get_cap
+from utils import get_size, is_subscribed, pub_is_subscribed, get_poster, search_gagala, temp, get_settings, save_group_settings, get_shortlink, get_tutorial, send_all, get_cap, is_authorized_user
 from database.users_chats_db import db
 from database.ia_filterdb import col, sec_col, db as vjdb, sec_db, get_file_details, get_search_results, get_bad_files
 from database.filters_mdb import del_all, find_filter, get_filters
@@ -2614,6 +2614,17 @@ async def auto_filter(client, name, msg, reply_msg, ai_search, spoll=False):
     if not spoll:
         message = msg
         if message.text.startswith("/"): return  # ignore commands
+        
+        # Check if user is authorized to use the bot
+        user_id = message.from_user.id if message.from_user else None
+        if user_id and not await is_authorized_user(user_id, "basic"):
+            await reply_msg.edit_text(
+                "🚫 **অ্যাক্সেস নিষিদ্ধ**\n\n"
+                "দুঃখিত, এই বট শুধুমাত্র অনুমোদিত ব্যবহারকারীদের জন্য।\n"
+                "প্রিমিয়াম অ্যাক্সেসের জন্য অ্যাডমিনের সাথে যোগাযোগ করুন।\n\n"
+                f"👮 অ্যাডমিন: {OWNER_LNK}"
+            )
+            return
         if re.findall("((^\/|^,|^!|^\.|^[\U0001F600-\U000E007F]).*)", message.text):
             return
         if len(message.text) < 100:
