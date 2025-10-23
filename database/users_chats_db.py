@@ -403,6 +403,139 @@ class Database:
             {'id': int(user_id)}, 
             {'$set': {'daily_downloads': daily_downloads}}
         )
+
+    # Premium User Management Functions
+    async def get_all_premium_users(self):
+        """Get all premium users with their details"""
+        cursor = self.users.find({
+            "expiry_time": {"$ne": None, "$gt": datetime.datetime.now()}
+        })
+        premium_users = []
+        async for user in cursor:
+            user_info = {
+                "user_id": user.get("id"),
+                "expiry_time": user.get("expiry_time"),
+                "has_free_trial": user.get("has_free_trial", False),
+                "total_requests": user.get("total_requests", 0),
+                "daily_requests": user.get("daily_requests", 0)
+            }
+            premium_users.append(user_info)
+        return premium_users
+
+    async def get_premium_user_details(self, user_id):
+        """Get detailed information about a specific premium user"""
+        user_data = await self.get_user(user_id)
+        if user_data and await self.has_premium_access(user_id):
+            expiry_time = user_data.get("expiry_time")
+            remaining_time = expiry_time - datetime.datetime.now() if expiry_time else None
+            
+            return {
+                "user_id": user_id,
+                "expiry_time": expiry_time,
+                "remaining_time": remaining_time,
+                "has_free_trial": user_data.get("has_free_trial", False),
+                "total_requests": user_data.get("total_requests", 0),
+                "daily_requests": user_data.get("daily_requests", 0),
+                "max_daily_requests": user_data.get("max_daily_requests", 10)
+            }
+        return None
+
+    async def add_premium_user(self, user_id, duration_days, is_admin_added=True):
+        """Add premium access to a user"""
+        expiry_time = datetime.datetime.now() + datetime.timedelta(days=duration_days)
+        user_data = {
+            "id": user_id,
+            "expiry_time": expiry_time,
+            "has_free_trial": False,
+            "daily_requests": 0,
+            "total_requests": 0,
+            "max_daily_requests": 10,
+            "admin_added": is_admin_added,
+            "added_date": datetime.datetime.now()
+        }
+        await self.users.update_one({"id": user_id}, {"$set": user_data}, upsert=True)
+        return expiry_time
+
+    async def remove_premium_user(self, user_id):
+        """Remove premium access from a user"""
+        await self.users.update_one(
+            {"id": user_id}, 
+            {"$set": {"expiry_time": None}}
+        )
+
+    async def extend_premium_user(self, user_id, additional_days):
+        """Extend premium access for a user"""
+        user_data = await self.get_user(user_id)
+        if user_data:
+            current_expiry = user_data.get("expiry_time")
+            if current_expiry and current_expiry > datetime.datetime.now():
+                # Extend from current expiry
+                new_expiry = current_expiry + datetime.timedelta(days=additional_days)
+            else:
+                # Start from now
+                new_expiry = datetime.datetime.now() + datetime.timedelta(days=additional_days)
+            
+            await self.users.update_one(
+                {"id": user_id}, 
+                {"$set": {"expiry_time": new_expiry}}
+            )
+            return new_expiry
+        return None
+
+    async def get_premium_stats(self):
+        """Get premium user statistics"""
+        total_premium = await self.users.count_documents({
+            "expiry_time": {"$ne": None, "$gt": datetime.datetime.now()}
+        })
+        
+        expired_premium = await self.users.count_documents({
+            "expiry_time": {"$ne": None, "$lt": datetime.datetime.now()}
+        })
+        
+        free_trial_users = await self.users.count_documents({
+            "has_free_trial": True
+        })
+        
+        # Get users expiring in next 7 days
+        next_week = datetime.datetime.now() + datetime.timedelta(days=7)
+        expiring_soon = await self.users.count_documents({
+            "expiry_time": {
+                "$gt": datetime.datetime.now(),
+                "$lt": next_week
+            }
+        })
+        
+        return {
+            "total_premium": total_premium,
+            "expired_premium": expired_premium,
+            "free_trial_users": free_trial_users,
+            "expiring_soon": expiring_soon
+        }
+
+    async def search_premium_users(self, search_term=None, status="active"):
+        """Search premium users by various criteria"""
+        query = {}
+        
+        if status == "active":
+            query["expiry_time"] = {"$ne": None, "$gt": datetime.datetime.now()}
+        elif status == "expired":
+            query["expiry_time"] = {"$ne": None, "$lt": datetime.datetime.now()}
+        elif status == "trial":
+            query["has_free_trial"] = True
+        
+        if search_term:
+            try:
+                user_id = int(search_term)
+                query["id"] = user_id
+            except ValueError:
+                pass
+        
+        cursor = self.users.find(query)
+        users = []
+        async for user in cursor:
+            users.append(user)
+        
+        return users
     
 
 db = Database(USER_DB_URI, DATABASE_NAME)
