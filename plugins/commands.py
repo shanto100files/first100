@@ -804,6 +804,17 @@ async def settings(client, message):
     userid = message.from_user.id if message.from_user else None
     if not userid:
         return await message.reply(f"You are anonymous admin. Use /connect {message.chat.id} in PM")
+    
+    # Check if user is authorized to use the bot
+    if not await is_authorized_user(userid, "basic"):
+        await message.reply(
+            "🚫 **অ্যাক্সেস নিষিদ্ধ**\n\n"
+            "দুঃখিত, এই বট শুধুমাত্র অনুমোদিত ব্যবহারকারীদের জন্য।\n"
+            "প্রিমিয়াম অ্যাক্সেসের জন্য অ্যাডমিনের সাথে যোগাযোগ করুন।\n\n"
+            f"👮 অ্যাডমিন: {OWNER_LNK}"
+        )
+        return
+    
     chat_type = message.chat.type
 
     if chat_type == enums.ChatType.PRIVATE:
@@ -1148,6 +1159,16 @@ async def shortlink(bot, message):
     userid = message.from_user.id if message.from_user else None
     if not userid:
         return await message.reply(f"You are anonymous admin. Turn off anonymous admin and try again this command")
+    
+    # Check if user is authorized to use the bot
+    if not await is_authorized_user(userid, "basic"):
+        await message.reply(
+            "🚫 **অ্যাক্সেস নিষিদ্ধ**\n\n"
+            "দুঃখিত, এই বট শুধুমাত্র অনুমোদিত ব্যবহারকারীদের জন্য।\n"
+            "প্রিমিয়াম অ্যাক্সেসের জন্য অ্যাডমিনের সাথে যোগাযোগ করুন।\n\n"
+            f"👮 অ্যাডমিন: {OWNER_LNK}"
+        )
+        return
     chat_type = message.chat.type
     if chat_type == enums.ChatType.PRIVATE:
         return await message.reply_text(f"<b>Hey {message.from_user.mention}, This command only works on groups !\n\n<u>Follow These Steps to Connect Shortener:</u>\n\n1. Add Me in Your Group with Full Admin Rights\n\n2. After Adding in Grp, Set your Shortener\n\nSend this command in your group\n\n—> /shortlink ""{your_shortener_website_name} {your_shortener_api}\n\n#Sample:-\n/shortlink kpslink.in CAACAgUAAxkBAAEJ4GtkyPgEzpIUC_DSmirN6eFWp4KInAACsQoAAoHSSFYub2D15dGHfy8E\n\nThat's it!!! Enjoy Earning Money 💲\n\n[[[ Trusted Earning Site - https://cinepix.top]]]\n\nIf you have any Doubts, Feel Free to Ask me - @kingvj01\n\n(Puriyala na intha contact la message pannunga - @kngvj01)</b>")
@@ -1259,6 +1280,16 @@ async def settutorial(bot, message):
     userid = message.from_user.id if message.from_user else None
     if not userid:
         return await message.reply(f"You are anonymous admin. Turn off anonymous admin and try again this command")
+    
+    # Check if user is authorized to use the bot
+    if not await is_authorized_user(userid, "basic"):
+        await message.reply(
+            "🚫 **অ্যাক্সেস নিষিদ্ধ**\n\n"
+            "দুঃখিত, এই বট শুধুমাত্র অনুমোদিত ব্যবহারকারীদের জন্য।\n"
+            "প্রিমিয়াম অ্যাক্সেসের জন্য অ্যাডমিনের সাথে যোগাযোগ করুন।\n\n"
+            f"👮 অ্যাডমিন: {OWNER_LNK}"
+        )
+        return
     chat_type = message.chat.type
     if chat_type == enums.ChatType.PRIVATE:
         return await message.reply_text("This Command Work Only in group\n\nTry it in your own group")
@@ -1289,6 +1320,16 @@ async def removetutorial(bot, message):
     userid = message.from_user.id if message.from_user else None
     if not userid:
         return await message.reply(f"You are anonymous admin. Turn off anonymous admin and try again this command")
+    
+    # Check if user is authorized to use the bot
+    if not await is_authorized_user(userid, "basic"):
+        await message.reply(
+            "🚫 **অ্যাক্সেস নিষিদ্ধ**\n\n"
+            "দুঃখিত, এই বট শুধুমাত্র অনুমোদিত ব্যবহারকারীদের জন্য।\n"
+            "প্রিমিয়াম অ্যাক্সেসের জন্য অ্যাডমিনের সাথে যোগাযোগ করুন।\n\n"
+            f"👮 অ্যাডমিন: {OWNER_LNK}"
+        )
+        return
     chat_type = message.chat.type
     if chat_type == enums.ChatType.PRIVATE:
         return await message.reply_text("This Command Work Only in group\n\nTry it in your own group")
@@ -1320,6 +1361,16 @@ async def nofsub(client, message):
     userid = message.from_user.id if message.from_user else None
     if not userid:
         return await message.reply(f"<b>You are anonymous admin. Turn off anonymous admin and try again this command</b>")
+    
+    # Check if user is authorized to use the bot
+    if not await is_authorized_user(userid, "basic"):
+        await message.reply(
+            "🚫 **অ্যাক্সেস নিষিদ্ধ**\n\n"
+            "দুঃখিত, এই বট শুধুমাত্র অনুমোদিত ব্যবহারকারীদের জন্য।\n"
+            "প্রিমিয়াম অ্যাক্সেসের জন্য অ্যাডমিনের সাথে যোগাযোগ করুন।\n\n"
+            f"👮 অ্যাডমিন: {OWNER_LNK}"
+        )
+        return
     chat_type = message.chat.type
     if chat_type == enums.ChatType.PRIVATE:
         return await message.reply_text("<b>This Command Work Only in group\n\nTry it in your own group</b>")
@@ -1458,6 +1509,17 @@ async def plans_cmd_handler(client, message):
 @Client.on_message(filters.command("myplan"))
 async def check_plans_cmd(client, message):
     if PREMIUM_AND_REFERAL_MODE == False:
+        return
+    
+    # Check if user is authorized to use premium commands
+    user_id = message.from_user.id if message.from_user else None
+    if user_id and not await is_authorized_user(user_id, "basic"):
+        await message.reply(
+            "🚫 **অ্যাক্সেস নিষিদ্ধ**\n\n"
+            "দুঃখিত, এই বট শুধুমাত্র অনুমোদিত ব্যবহারকারীদের জন্য।\n"
+            "প্রিমিয়াম অ্যাক্সেসের জন্য অ্যাডমিনের সাথে যোগাযোগ করুন।\n\n"
+            f"👮 অ্যাডমিন: {OWNER_LNK}"
+        )
         return
     user_id  = message.from_user.id
     if await db.has_premium_access(user_id):
