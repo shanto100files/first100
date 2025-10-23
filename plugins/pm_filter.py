@@ -1824,6 +1824,38 @@ Benefits of Premium:
 
     elif query.data.startswith("generate_stream_link"):
         _, file_id = query.data.split(":")
+        user_id = query.from_user.id
+        
+        # Check if user has premium access
+        if not await db.has_premium_access(user_id):
+            # Check daily stream limit for free users
+            daily_count = await db.get_daily_stream_count(user_id)
+            if daily_count >= 2:
+                text = f"""<b>🚫 Daily Stream Limit Exceeded!</b>
+
+📊 <b>Your Usage Today:</b> {daily_count}/2 streams used
+
+🎯 <b>Free User Limitations:</b>
+• Only 2 stream requests per day
+• Limited access to premium features
+
+💎 <b>Upgrade to Premium for:</b>
+• ♾️ Unlimited streaming
+• 🚀 Faster download speeds  
+• 📱 Priority support
+• 🎬 HD quality streaming
+• 📂 No file size limits
+
+👨‍💼 <b>Contact Admin to Get Premium:</b>
+Send /plan to see premium plans or contact @YourAdminUsername
+
+⏰ <b>Your limit will reset tomorrow!</b>"""
+                await query.answer(text, show_alert=True)
+                return
+            
+            # Increment stream count for free users
+            await db.increment_daily_stream_count(user_id)
+        
         try:
             log_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=file_id)
             fileName = {quote_plus(get_name(log_msg))}
