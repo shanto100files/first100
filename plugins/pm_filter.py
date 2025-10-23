@@ -1153,18 +1153,25 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 [InlineKeyboardButton("⚠️ ᴄʟᴏsᴇ ⚠️", callback_data="close_data")]
             ]
             
-            remaining_gb = (3 - (await db.get_daily_download_size(query.from_user.id))/(1024*1024*1024))
-            text = f"""<b>📊 Daily Stream Limit Exceeded!</b>
+            daily_count = await db.get_daily_stream_count(query.from_user.id)
+            text = f"""<b>দৈনিক ট্রায়াল শেষ!</b>
 
-<b>• Free users can stream up to 3GB/day
-• Your remaining quota: {remaining_gb:.2f}GB 
-• Buy Premium for unlimited streaming
+<b>আজকের ব্যবহার:</b> {daily_count}/2 ফাইল ডাউনলোড করেছেন
 
-Benefits of Premium:
-• Unlimited Streaming
-• No Daily Limits
-• Ad-free Experience
-• Priority Support</b>"""
+<b>ফ্রি ইউজার সীমাবদ্ধতা:</b>
+- দিনে মাত্র ২টি ফাইল ডাউনলোড
+- সীমিত প্রিমিয়াম ফিচার
+
+<b>প্রিমিয়াম নিয়ে পান:</b>
+- আনলিমিটেড ডাউনলোড
+- দ্রুত ডাউনলোড স্পিড  
+- প্রাইওরিটি সাপোর্ট
+- HD কোয়ালিটি স্ট্রিমিং
+- কোনো ফাইল সাইজ লিমিট নেই
+
+<b>প্রিমিয়াম কিনতে অ্যাডমিনের সাথে যোগাযোগ করুন</b>
+
+<b>আপনার লিমিট আগামীকাল রিসেট হবে!</b>"""
             
             await query.message.edit_text(text=text, reply_markup=InlineKeyboardMarkup(btn))
         else:
@@ -1182,6 +1189,12 @@ Benefits of Premium:
             new_text= "**🤣 you already used free now no more free trail. please buy subscription here are our 👉 /plans**"
             await query.message.edit_text(text=new_text)
             return
+    
+    elif query.data == "try_again":
+        # Close the current message and let user try again
+        await query.message.delete()
+        await query.answer("আবার সার্চ করুন বা অন্য ফাইল খুঁজুন। মনে রাখবেন দিনে মাত্র ২টি ফাইল ডাউনলোড করতে পারবেন।", show_alert=True)
+        return
             
     elif query.data == "buy_premium":
         btn = [[            
@@ -1877,25 +1890,25 @@ Benefits of Premium:
             # Check daily stream limit for free users
             daily_count = await db.get_daily_stream_count(user_id)
             if daily_count >= 2:
-                text = f"""<b>🚫 Daily Stream Limit Exceeded!</b>
+                text = f"""<b>Daily Stream Limit Exceeded!</b>
 
-📊 <b>Your Usage Today:</b> {daily_count}/2 streams used
+<b>Your Usage Today:</b> {daily_count}/2 streams used
 
-🎯 <b>Free User Limitations:</b>
-• Only 2 stream requests per day
-• Limited access to premium features
+<b>Free User Limitations:</b>
+- Only 2 stream requests per day
+- Limited access to premium features
 
-💎 <b>Upgrade to Premium for:</b>
-• ♾️ Unlimited streaming
-• 🚀 Faster download speeds  
-• 📱 Priority support
-• 🎬 HD quality streaming
-• 📂 No file size limits
+<b>Upgrade to Premium for:</b>
+- Unlimited streaming
+- Faster download speeds  
+- Priority support
+- HD quality streaming
+- No file size limits
 
-👨‍💼 <b>Contact Admin to Get Premium:</b>
+<b>Contact Admin to Get Premium:</b>
 Send /plan to see premium plans or contact @YourAdminUsername
 
-⏰ <b>Your limit will reset tomorrow!</b>"""
+<b>Your limit will reset tomorrow!</b>"""
                 await query.answer(text, show_alert=True)
                 return
             
