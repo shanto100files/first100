@@ -25,18 +25,19 @@ async def check_stream_limit(user_id, file_size):
     await db.update_daily_download_size(user_id, file_size)
     return True
 
-async def generate_stream_buttons(client, message, file_id, file_size):
+async def generate_stream_buttons(client, message, file_id, file_size, download_link=None, stream_link=None):
     user_id = message.from_user.id
 
     if await db.has_premium_access(user_id):
         # Premium user - show all buttons
-        buttons = [[
-            InlineKeyboardButton("• ᴅᴏᴡɴʟᴏᴀᴅ •", url=download_link),
-            InlineKeyboardButton('• ᴡᴀᴛᴄʜ •', url=stream_link)
-        ],[
-            InlineKeyboardButton("• ᴡᴀᴛᴄʜ ɪɴ ᴡᴇʙ ᴀᴘᴘ •", web_app=WebAppInfo(url=stream_link))
-        ]]
-        return buttons
+        if download_link and stream_link:
+            buttons = [[
+                InlineKeyboardButton("• ᴅᴏᴡɴʟᴏᴀᴅ •", url=download_link),
+                InlineKeyboardButton('• ᴡᴀᴛᴄʜ •', url=stream_link)
+            ],[
+                InlineKeyboardButton("• ᴡᴀᴛᴄʜ ɪɴ ᴡᴇʙ ᴀᴘᴘ •", web_app=WebAppInfo(url=stream_link))
+            ]]
+            return buttons
 
     # Check token verification for stream/download access (non-premium users)
     if not await check_verification(client, user_id) and VERIFY == True:
@@ -48,24 +49,24 @@ async def generate_stream_buttons(client, message, file_id, file_size):
     # Free user - check daily limit
     current_size = await db.get_daily_download_size(user_id)
     FREE_LIMIT = 3 * 1024 * 1024 * 1024  # 3GB
-
+    
     if current_size + file_size > FREE_LIMIT:
-        # Limit exceeded - show premium message button
+        # Show premium upgrade button
         buttons = [[
-            InlineKeyboardButton("💫 ᴡᴀᴛᴄʜ/ᴅᴏᴡɴʟᴏᴀᴅ 💫", callback_data="stream_limit")
+            InlineKeyboardButton("💎 ɢᴇᴛ ᴘʀᴇᴍɪᴜᴍ", callback_data="premium_info")
         ]]
-    else:
-        # Within limit - show normal buttons
+        return buttons
+    
+    # Free user within limit - show stream/download buttons
+    if download_link and stream_link:
         buttons = [[
             InlineKeyboardButton("• ᴅᴏᴡɴʟᴏᴀᴅ •", url=download_link),
             InlineKeyboardButton('• ᴡᴀᴛᴄʜ •', url=stream_link)
-        ],[
-            InlineKeyboardButton("• ᴡᴀᴛᴄʜ ɪɴ ᴡᴇʙ ᴀᴘᴘ •", web_app=WebAppInfo(url=stream_link))
         ]]
-        # Update used quota
-        await db.update_daily_download_size(user_id, file_size)
-
-    return buttons
+        return buttons
+    
+    # Default fallback
+    return [[InlineKeyboardButton("❌ ᴇʀʀᴏʀ", callback_data="error")]]
 
 @Client.on_message(filters.private & filters.command("stream"))
 async def stream_start(client, message):
