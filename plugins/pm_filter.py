@@ -6,6 +6,7 @@ import os, logging, string, asyncio, time, re, ast, random, math, pytz, pyrogram
 from datetime import datetime, timedelta, date, time
 from Script import script
 from info import *
+from info import RESTRICT_SEARCH_TO_GROUPS, ALLOWED_GROUPS, ALLOW_PM_SEARCH
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto, ChatPermissions, WebAppInfo
 from pyrogram import Client, filters, enums
 from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerIdInvalid
@@ -33,6 +34,11 @@ SPELL_CHECK = {}
 
 @Client.on_message(filters.group & filters.text & filters.incoming)
 async def give_filter(client, message):
+    # Check if search is restricted to specific groups
+    if RESTRICT_SEARCH_TO_GROUPS:
+        if message.chat.id not in ALLOWED_GROUPS:
+            return  # Silently ignore search requests from non-allowed groups
+    
     if message.chat.id != SUPPORT_CHAT_ID:
         settings = await get_settings(message.chat.id)
         chatid = message.chat.id 
@@ -78,6 +84,16 @@ async def pm_text(bot, message):
     user = message.from_user.first_name
     user_id = message.from_user.id
     if content.startswith("/") or content.startswith("#"): return  # ignore commands and hashtags
+    
+    # Check if private message search is allowed
+    if RESTRICT_SEARCH_TO_GROUPS and not ALLOW_PM_SEARCH:
+        await message.reply_text(
+            "🚫 **সার্চ নিষিদ্ধ**\n\n"
+            "দুঃখিত, এই বটে শুধুমাত্র নির্দিষ্ট গ্রুপে সার্চ করা যায়।\n"
+            "প্রাইভেট মেসেজে সার্চ বন্ধ করা আছে।\n\n"
+            "অনুমোদিত গ্রুপে যোগ দিয়ে সার্চ করুন।"
+        )
+        return
     if PM_SEARCH == True:
         ai_search = True
         reply_msg = await bot.send_message(message.from_user.id, f"<b><i>Searching For {content} 🔍</i></b>", reply_to_message_id=message.id)
