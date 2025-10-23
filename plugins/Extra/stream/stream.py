@@ -1,12 +1,14 @@
 from pyrogram import Client, filters, enums
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ForceReply, CallbackQuery, WebAppInfo
-from info import STREAM_MODE, URL, LOG_CHANNEL
+from info import STREAM_MODE, URL, LOG_CHANNEL, VERIFY, VERIFY_TUTORIAL
 from urllib.parse import quote_plus
 from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
 from TechVJ.util.human_readable import humanbytes
 import humanize
 import random
 from database.users_chats_db import db
+from utils import check_verification, get_token
+import temp
 
 async def check_stream_limit(user_id, file_size):
     # Check if user has premium access
@@ -36,6 +38,13 @@ async def generate_stream_buttons(client, message, file_id, file_size):
         ]]
         return buttons
 
+    # Check token verification for stream/download access (non-premium users)
+    if not await check_verification(client, user_id) and VERIFY == True:
+        buttons = [[
+            InlineKeyboardButton("🔐 ᴠᴇʀɪꜰʏ ғᴏʀ sᴛʀᴇᴀᴍ/ᴅᴏᴡɴʟᴏᴀᴅ", url=await get_token(client, user_id, f"https://telegram.me/{temp.U_NAME}?start="))
+        ]]
+        return buttons
+
     # Free user - check daily limit
     current_size = await db.get_daily_download_size(user_id)
     FREE_LIMIT = 3 * 1024 * 1024 * 1024  # 3GB
@@ -62,6 +71,22 @@ async def generate_stream_buttons(client, message, file_id, file_size):
 async def stream_start(client, message):
     if STREAM_MODE == False:
         return
+
+    # Check token verification for stream/download access (except premium users)
+    if not await db.has_premium_access(message.from_user.id):
+        if not await check_verification(client, message.from_user.id) and VERIFY == True:
+            btn = [[
+                InlineKeyboardButton("🔐 ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ғᴏʀ sᴛʀᴇᴀᴍ", url=await get_token(client, message.from_user.id, f"https://telegram.me/{temp.U_NAME}?start="))
+            ],[
+                InlineKeyboardButton("ʜᴏᴡ ᴛᴏ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ", url=VERIFY_TUTORIAL)
+            ]]
+            text = "<b>🔒 sᴛʀᴇᴀᴍ & ᴅᴏᴡɴʟᴏᴀᴅ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ʀᴇǫᴜɪʀᴇᴅ!\n\nʏᴏᴜ ɴᴇᴇᴅ ᴛᴏ ᴠᴇʀɪꜰʏ ʏᴏᴜʀsᴇʟꜰ ᴛᴏ ᴀᴄᴄᴇss sᴛʀᴇᴀᴍ & ᴅᴏᴡɴʟᴏᴀᴅ ғᴇᴀᴛᴜʀᴇs.\n\n⏰ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ᴠᴀʟɪᴅ ғᴏʀ 12 ʜᴏᴜʀs\n\n💡 ɴᴏᴛᴇ: ᴅɪʀᴇᴄᴛ ғɪʟᴇ ᴀᴄᴄᴇss ɪs sᴛɪʟʟ ғʀᴇᴇ!</b>"
+            await message.reply_text(
+                text=text,
+                protect_content=True,
+                reply_markup=InlineKeyboardMarkup(btn)
+            )
+            return
 
     msg = await client.ask(message.chat.id, "**Now send me your file/video to get stream and download link**")
 
