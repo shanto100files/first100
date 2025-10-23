@@ -314,13 +314,14 @@ async def start(client, message):
             if f_caption is None:
                 f_caption = f"{title}"
             try:
-                if STREAM_MODE == True:
+                # Show stream links if STREAM_MODE is True OR user has premium access
+                if STREAM_MODE == True or await db.has_premium_access(message.from_user.id):
                     log_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=msg.get("file_id"))
                     fileName = {quote_plus(get_name(log_msg))}
                     stream = f"{URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
                     download = f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
 
-                if STREAM_MODE == True:
+                if STREAM_MODE == True or await db.has_premium_access(message.from_user.id):
                     button = [[
                         InlineKeyboardButton("• ᴅᴏᴡɴʟᴏᴀᴅ •", url=download),
                         InlineKeyboardButton('• ᴡᴀᴛᴄʜ •', url=stream)
@@ -386,13 +387,14 @@ async def start(client, message):
                     except:
                         f_caption = getattr(msg, 'caption', '')
                 file_id = file.file_id
-                if STREAM_MODE == True:
+                # Show stream links if STREAM_MODE is True OR user has premium access
+                if STREAM_MODE == True or await db.has_premium_access(message.from_user.id):
                     log_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=file_id)
                     fileName = {quote_plus(get_name(log_msg))}
                     stream = f"{URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
                     download = f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
 
-                if STREAM_MODE == True:
+                if STREAM_MODE == True or await db.has_premium_access(message.from_user.id):
                     button = [[
                         InlineKeyboardButton("• ᴅᴏᴡɴʟᴏᴀᴅ •", url=download),
                         InlineKeyboardButton('• ᴡᴀᴛᴄʜ •', url=stream)
@@ -517,7 +519,8 @@ async def start(client, message):
                         reply_markup=InlineKeyboardMarkup(btn)
                     )
                     return
-            if STREAM_MODE == True:
+            # Show stream button if STREAM_MODE is True OR user has premium access
+            if STREAM_MODE == True or await db.has_premium_access(message.from_user.id):
                 button = [[InlineKeyboardButton('sᴛʀᴇᴀᴍ ᴀɴᴅ ᴅᴏᴡɴʟᴏᴀᴅ', callback_data=f'generate_stream_link:{file_id}')]]
                 reply_markup=InlineKeyboardMarkup(button)
             else:
@@ -580,7 +583,8 @@ async def start(client, message):
                         reply_markup=InlineKeyboardMarkup(btn)
                     )
                     return
-            if STREAM_MODE == True:
+            # Show stream button if STREAM_MODE is True OR user has premium access
+            if STREAM_MODE == True or await db.has_premium_access(message.from_user.id):
                 button = [[InlineKeyboardButton('sᴛʀᴇᴀᴍ ᴀɴᴅ ᴅᴏᴡɴʟᴏᴀᴅ', callback_data=f'generate_stream_link:{file_id}')]]
                 reply_markup=InlineKeyboardMarkup(button)
             else:
@@ -624,7 +628,8 @@ async def start(client, message):
         f_caption = f"{' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@'), files['file_name'].split()))}"
     # Direct file access allowed without token verification
     # Token verification will be required only for stream/download functionality
-    if STREAM_MODE == True:
+    # Show stream button if STREAM_MODE is True OR user has premium access
+    if STREAM_MODE == True or await db.has_premium_access(message.from_user.id):
         button = [[InlineKeyboardButton('sᴛʀᴇᴀᴍ ᴀɴᴅ ᴅᴏᴡɴʟᴏᴀᴅ', callback_data=f'generate_stream_link:{file_id}')]]
         reply_markup=InlineKeyboardMarkup(button)
     else:
