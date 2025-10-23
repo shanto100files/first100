@@ -7,8 +7,7 @@ from TechVJ.util.human_readable import humanbytes
 import humanize
 import random
 from database.users_chats_db import db
-from utils import check_verification, get_token
-import temp
+from utils import check_verification, get_token, temp
 
 async def check_stream_limit(user_id, file_size):
     # Check if user has premium access
@@ -155,17 +154,8 @@ Send /plan to see premium plans"""
             ]]
         )
     )
-    # Create buttons with permanent links
-    buttons = [
-        [
-            InlineKeyboardButton("🚀 Download 🚀", url=download),
-            InlineKeyboardButton('🖥️ Stream 🖥️', url=stream)
-        ],
-        [
-            InlineKeyboardButton("♾️ Permanent Download ♾️", url=permanent_download),
-            InlineKeyboardButton('♾️ Permanent Stream ♾️', url=permanent_stream)
-        ]
-    ]
+    # Generate buttons using the function
+    buttons = await generate_stream_buttons(client, message, fileid, file.file_size, permanent_download, permanent_stream)
 
     await message.reply_text(
         text=f"**Here is your link!\n\n📁 File: {filename}\n📦 Size: {filesize}\n\n❗️ Use Permanent links for long-term access**",
