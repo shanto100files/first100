@@ -557,6 +557,26 @@ async def get_verify_shorted_link(link, url, api):
         except Exception as e:
             logger.error(e)
             return link
+    elif URL == "shortlink.cinepix.top" or "cinepix.top" in URL:
+        # Cinepix.top API integration for verification
+        url = f'http://shortlink.cinepix.top/api'
+        params = {
+            "api": API,
+            "url": link,
+        }
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, params=params, raise_for_status=True, ssl=False) as response:
+                    data = await response.text()
+                    # Check if response is valid shortened URL
+                    if data and data.startswith('http'):
+                        return data
+                    else:
+                        logger.error(f"Invalid response from cinepix.top: {data}")
+                        return link
+        except Exception as e:
+            logger.error(f"Error with cinepix.top API: {e}")
+            return link
     else:
         shortzy = Shortzy(api_key=API, base_site=URL)
         link = await shortzy.convert(link)
