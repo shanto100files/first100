@@ -10,7 +10,7 @@ from pyrogram import enums
 from pyrogram.errors import *
 from typing import Union
 from Script import script
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from typing import List
 from database.users_chats_db import db
 from database.join_reqs import JoinReqs
@@ -511,6 +511,26 @@ async def get_shortlink(chat_id, link):
         except Exception as e:
             logger.error(e)
             return link
+    elif URL == "shortlink.cinepix.top" or "cinepix.top" in URL:
+        # Cinepix.top API integration
+        url = f'http://shortlink.cinepix.top/api'
+        params = {
+            "api": API,
+            "url": link,
+        }
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, params=params, raise_for_status=True, ssl=False) as response:
+                    data = await response.text()
+                    # Check if response is valid shortened URL
+                    if data and data.startswith('http'):
+                        return data
+                    else:
+                        logger.error(f"Invalid response from cinepix.top: {data}")
+                        return link
+        except Exception as e:
+            logger.error(f"Error with cinepix.top API: {e}")
+            return link
     else:
         shortzy = Shortzy(api_key=API, base_site=URL)
         link = await shortzy.convert(link)
@@ -536,6 +556,26 @@ async def get_verify_shorted_link(link, url, api):
                     return data
         except Exception as e:
             logger.error(e)
+            return link
+    elif URL == "shortlink.cinepix.top" or "cinepix.top" in URL:
+        # Cinepix.top API integration for verification
+        url = f'http://shortlink.cinepix.top/api'
+        params = {
+            "api": API,
+            "url": link,
+        }
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, params=params, raise_for_status=True, ssl=False) as response:
+                    data = await response.text()
+                    # Check if response is valid shortened URL
+                    if data and data.startswith('http'):
+                        return data
+                    else:
+                        logger.error(f"Invalid response from cinepix.top: {data}")
+                        return link
+        except Exception as e:
+            logger.error(f"Error with cinepix.top API: {e}")
             return link
     else:
         shortzy = Shortzy(api_key=API, base_site=URL)
@@ -580,8 +620,9 @@ async def verify_user(bot, userid, token):
         await bot.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(user.id, user.mention))
     TOKENS[user.id] = {token: True}
     tz = pytz.timezone('Asia/Kolkata')
-    today = date.today()
-    VERIFIED[user.id] = str(today)
+    # Store verification timestamp for 12-hour validity
+    verification_time = datetime.now(tz)
+    VERIFIED[user.id] = verification_time.isoformat()
 
 async def check_verification(bot, userid):
     user = await bot.get_users(userid)
@@ -589,15 +630,26 @@ async def check_verification(bot, userid):
         await db.add_user(user.id, user.first_name)
         await bot.send_message(LOG_CHANNEL, script.LOG_TEXT_P.format(user.id, user.mention))
     tz = pytz.timezone('Asia/Kolkata')
-    today = date.today()
+    current_time = datetime.now(tz)
+    
     if user.id in VERIFIED.keys():
-        EXP = VERIFIED[user.id]
-        years, month, day = EXP.split('-')
-        comp = date(int(years), int(month), int(day))
-        if comp<today:
+        try:
+            # Parse stored verification timestamp
+            verification_time_str = VERIFIED[user.id]
+            verification_time = datetime.fromisoformat(verification_time_str)
+            
+            # Check if verification is still valid (12 hours)
+            time_difference = current_time - verification_time
+            if time_difference <= timedelta(hours=12):
+                return True
+            else:
+                # Remove expired verification
+                del VERIFIED[user.id]
+                return False
+        except (ValueError, KeyError):
+            # Handle old date format or invalid data
+            del VERIFIED[user.id]
             return False
-        else:
-            return True
     else:
         return False  
     
@@ -740,3 +792,57 @@ async def get_seconds(time_string):
     else:
         return 0
 
+# Access Control Functions
+async def is_admin_user(user_id):
+    """Check if user is an admin"""
+    from info import ADMINS
+    return user_id in ADMINS
+
+async def is_authorized_user(user_id, command_type="basic"):
+    """
+    Check if user is authorized to use a command
+    command_type: "basic", "premium", "admin", "group_admin"
+    """
+    from info import ADMINS, PUBLIC_BOT, ADMIN_ONLY_MODE, ALLOW_PREMIUM_COMMANDS
+    from database.users_chats_db import db
+    
+    # Admins can always use any command
+    if user_id in ADMINS:
+        return True
+    
+    # If admin only mode is enabled, only admins can use commands
+    if ADMIN_ONLY_MODE:
+        return False
+    
+    # If public bot mode is enabled, anyone can use basic commands
+    if PUBLIC_BOT and command_type == "basic":
+        return True
+    
+    # Check premium commands
+    if command_type == "premium" and ALLOW_PREMIUM_COMMANDS:
+        try:
+            has_premium = await db.has_premium_access(user_id)
+            return has_premium
+        except:
+            return False
+    
+    # For admin commands, only admins are allowed
+    if command_type == "admin":
+        return False
+    
+    return False
+
+async def check_group_admin(client, chat_id, user_id):
+    """Check if user is admin in the group"""
+    from info import ADMINS
+    from pyrogram import enums
+    
+    # Bot admins can always manage groups
+    if user_id in ADMINS:
+        return True
+    
+    try:
+        user = await client.get_chat_member(chat_id, user_id)
+        return user.status in [enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER]
+    except:
+        return False
