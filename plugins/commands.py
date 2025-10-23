@@ -11,7 +11,7 @@ from database.ia_filterdb import col, sec_col, get_file_details, unpack_new_file
 from database.users_chats_db import db, delete_all_referal_users, get_referal_users_count, get_referal_all_users, referal_add_user
 from database.join_reqs import JoinReqs
 from info import CLONE_MODE, OWNER_LNK, REACTIONS, CHANNELS, REQUEST_TO_JOIN_MODE, TRY_AGAIN_BTN, ADMINS, SHORTLINK_MODE, PREMIUM_AND_REFERAL_MODE, STREAM_MODE, AUTH_CHANNEL, REFERAL_PREMEIUM_TIME, REFERAL_COUNT, PAYMENT_TEXT, PAYMENT_QR, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, CHNL_LNK, GRP_LNK, REQST_CHANNEL, SUPPORT_CHAT, MAX_B_TN, VERIFY, SHORTLINK_API, SHORTLINK_URL, TUTORIAL, VERIFY_TUTORIAL, IS_TUTORIAL, URL
-from utils import get_settings, pub_is_subscribed, get_size, is_subscribed, save_group_settings, temp, verify_user, check_token, check_verification, get_token, get_shortlink, get_tutorial, get_seconds, generate_stream_token, verify_stream_token, activate_stream_token, get_user_stream_tokens
+from utils import get_settings, pub_is_subscribed, get_size, is_subscribed, save_group_settings, temp, verify_user, check_token, check_verification, get_token, get_shortlink, get_tutorial, get_seconds
 from database.connections_mdb import active_connection
 from urllib.parse import quote_plus
 from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
@@ -49,10 +49,8 @@ async def start(client, message):
             buttons = [[
                 InlineKeyboardButton('⤬ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ ⤬', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
             ],[
+                InlineKeyboardButton('ᴇᴀʀɴ ᴍᴏɴᴇʏ', callback_data="shortlink_info"),
                 InlineKeyboardButton('ᴍᴏᴠɪᴇ ɢʀᴏᴜᴘ', url=GRP_LNK)
-            ],[
-                InlineKeyboardButton('🎯 ɢᴇᴛ ᴛᴏᴋᴇɴ', callback_data='get_token'),
-                InlineKeyboardButton('📊 ᴛᴏᴋᴇɴ ꜱᴛᴀᴛᴜꜱ', callback_data='token_status')
             ],[
                 InlineKeyboardButton('ʜᴇʟᴘ', callback_data='help'),
                 InlineKeyboardButton('ᴀʙᴏᴜᴛ', callback_data='about')
@@ -65,10 +63,8 @@ async def start(client, message):
             buttons = [[
                 InlineKeyboardButton('⤬ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ ⤬', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
             ],[
+                InlineKeyboardButton('ᴇᴀʀɴ ᴍᴏɴᴇʏ', callback_data="shortlink_info"),
                 InlineKeyboardButton('ᴍᴏᴠɪᴇ ɢʀᴏᴜᴘ', url=GRP_LNK)
-            ],[
-                InlineKeyboardButton('🎯 ɢᴇᴛ ᴛᴏᴋᴇɴ', callback_data='get_token'),
-                InlineKeyboardButton('📊 ᴛᴏᴋᴇɴ ꜱᴛᴀᴛᴜꜱ', callback_data='token_status')
             ],[
                 InlineKeyboardButton('ʜᴇʟᴘ', callback_data='help'),
                 InlineKeyboardButton('ᴀʙᴏᴜᴛ', callback_data='about')
@@ -139,6 +135,7 @@ async def start(client, message):
             buttons = [[
                 InlineKeyboardButton('⤬ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ ⤬', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
             ],[
+                InlineKeyboardButton('ᴇᴀʀɴ ᴍᴏɴᴇʏ', callback_data="shortlink_info"),
                 InlineKeyboardButton('ᴍᴏᴠɪᴇ ɢʀᴏᴜᴘ', url=GRP_LNK)
             ],[
                 InlineKeyboardButton('ʜᴇʟᴘ', callback_data='help'),
@@ -152,6 +149,7 @@ async def start(client, message):
             buttons = [[
                 InlineKeyboardButton('⤬ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ ⤬', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
             ],[
+                InlineKeyboardButton('ᴇᴀʀɴ ᴍᴏɴᴇʏ', callback_data="shortlink_info"),
                 InlineKeyboardButton('ᴍᴏᴠɪᴇ ɢʀᴏᴜᴘ', url=GRP_LNK)
             ],[
                 InlineKeyboardButton('ʜᴇʟᴘ', callback_data='help'),
@@ -192,6 +190,7 @@ async def start(client, message):
                 buttons = [[
                     InlineKeyboardButton('⤬ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ ⤬', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
                 ],[
+                    InlineKeyboardButton('ᴇᴀʀɴ ᴍᴏɴᴇʏ', callback_data="shortlink_info"),
                     InlineKeyboardButton('ᴍᴏᴠɪᴇ ɢʀᴏᴜᴘ', url=GRP_LNK)
                 ],[
                     InlineKeyboardButton('ʜᴇʟᴘ', callback_data='help'),
@@ -205,6 +204,7 @@ async def start(client, message):
                 buttons = [[
                     InlineKeyboardButton('⤬ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ ⤬', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
                 ],[
+                    InlineKeyboardButton('ᴇᴀʀɴ ᴍᴏɴᴇʏ', callback_data="shortlink_info"),
                     InlineKeyboardButton('ᴍᴏᴠɪᴇ ɢʀᴏᴜᴘ', url=GRP_LNK)
                 ],[
                     InlineKeyboardButton('ʜᴇʟᴘ', callback_data='help'),
@@ -1192,6 +1192,41 @@ async def onshortlink(bot, message):
     # ENABLE_SHORTLINK = True
     return await message.reply_text("Successfully enabled shortlink")
 
+@Client.on_message(filters.command("shortlink_info"))
+async def showshortlink(bot, message):
+    userid = message.from_user.id if message.from_user else None
+    if not userid:
+        return await message.reply(f"You are anonymous admin. Turn off anonymous admin and try again this command")
+    chat_type = message.chat.type
+    if chat_type == enums.ChatType.PRIVATE:
+        return await message.reply_text(f"<b>Hey {message.from_user.mention}, This Command Only Works in Group\n\nTry this command in your own group, if you are using me in your group</b>")
+    elif chat_type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
+        grpid = message.chat.id
+        title = message.chat.title
+    else:
+        return
+    chat_id=message.chat.id
+    userid = message.from_user.id
+    user = await bot.get_chat_member(grpid, userid)
+    if user.status != enums.ChatMemberStatus.ADMINISTRATOR and user.status != enums.ChatMemberStatus.OWNER and str(userid) not in ADMINS:
+        return await message.reply_text("<b>Tʜɪs ᴄᴏᴍᴍᴀɴᴅ Wᴏʀᴋs Oɴʟʏ Fᴏʀ ᴛʜɪs Gʀᴏᴜᴘ Oᴡɴᴇʀ/Aᴅᴍɪɴ\n\nTʀʏ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ɪɴ ʏᴏᴜʀ Oᴡɴ Gʀᴏᴜᴘ, Iғ Yᴏᴜ Aʀᴇ Usɪɴɢ Mᴇ Iɴ Yᴏᴜʀ Gʀᴏᴜᴘ</b>")
+    else:
+        settings = await get_settings(chat_id) #fetching settings for group
+        if 'shortlink' in settings.keys() and 'tutorial' in settings.keys():
+            su = settings['shortlink']
+            sa = settings['shortlink_api']
+            st = settings['tutorial']
+            return await message.reply_text(f"<b>Shortlink Website: <code>{su}</code>\n\nApi: <code>{sa}</code>\n\nTutorial: <code>{st}</code></b>")
+        elif 'shortlink' in settings.keys() and 'tutorial' not in settings.keys():
+            su = settings['shortlink']
+            sa = settings['shortlink_api']
+            return await message.reply_text(f"<b>Shortener Website: <code>{su}</code>\n\nApi: <code>{sa}</code>\n\nTutorial Link Not Connected\n\nYou can Connect Using /set_tutorial command</b>")
+        elif 'shortlink' not in settings.keys() and 'tutorial' in settings.keys():
+            st = settings['tutorial']
+            return await message.reply_text(f"<b>Tutorial: <code>{st}</code>\n\nShortener Url Not Connected\n\nYou can Connect Using /shortlink command</b>")
+        else:
+            return await message.reply_text("Shortener url and Tutorial Link Not Connected. Check this commands, /shortlink and /set_tutorial")
+
 
 @Client.on_message(filters.command("set_tutorial"))
 async def settutorial(bot, message):
@@ -1423,95 +1458,3 @@ async def purge_requests(client, message):
             parse_mode=enums.ParseMode.MARKDOWN,
             disable_web_page_preview=True
         )
-
-# Stream Token Commands
-@Client.on_message(filters.command("activate_stream") & filters.private)
-async def activate_stream_cmd(client, message):
-    """Command to activate stream access for 12 hours via shortlink"""
-    user_id = message.from_user.id
-    
-    # Check if user already has active tokens
-    active_tokens = await get_user_stream_tokens(user_id)
-    
-    if active_tokens:
-        expiry_time = active_tokens[0]['expiry'].strftime("%Y-%m-%d %H:%M:%S")
-        await message.reply_text(
-            f"🎬 **আপনার স্ট্রিম অ্যাক্সেস ইতিমধ্যে সক্রিয় আছে!**\n\n"
-            f"⏰ **মেয়াদ শেষ:** {expiry_time}\n\n"
-            f"🔄 **নতুন টোকেন পেতে মেয়াদ শেষ হওয়ার পর আবার কমান্ড ব্যবহার করুন।**"
-        )
-        return
-    
-    # Generate shortlink for token request
-    from utils import generate_token_request_link
-    from info import VERIFY_SHORTLINK_URL, VERIFY_SHORTLINK_API, VERIFY_TUTORIAL
-    
-    if not VERIFY_SHORTLINK_URL or not VERIFY_SHORTLINK_API:
-        # Fallback to direct token generation if shortlink not configured
-        token = await generate_stream_token(user_id)
-        if token:
-            await message.reply_text(
-                f"✅ **স্ট্রিম অ্যাক্সেস সক্রিয় করা হয়েছে!**\n\n"
-                f"🎬 **আপনি এখন ১২ ঘন্টার জন্য স্ট্রিম করতে পারবেন।**\n\n"
-                f"⏰ **মেয়াদ:** ১২ ঘন্টা\n\n"
-                f"📱 **এখন যেকোনো ফাইল রিকোয়েস্ট করুন এবং স্ট্রিম বাটন ব্যবহার করুন!**"
-            )
-        else:
-            await message.reply_text("❌ **টোকেন তৈরি করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।**")
-        return
-    
-    # Generate shortlink
-    result = await generate_token_request_link(user_id)
-    
-    if result:
-        short_url, verification_token = result
-        
-        # Create buttons
-        buttons = [
-            [InlineKeyboardButton("🎯 Get Token", url=short_url)]
-        ]
-        
-        if VERIFY_TUTORIAL:
-            buttons.append([InlineKeyboardButton("📖 How to Open Link", url=VERIFY_TUTORIAL)])
-        
-        await message.reply_text(
-            f"🎬 **স্ট্রিম টোকেন পেতে নিচের বাটনে ক্লিক করুন:**\n\n"
-            f"🔗 **Get Token বাটনে ক্লিক করুন**\n"
-            f"📺 **অ্যাড দেখুন এবং Continue/Get Token এ ক্লিক করুন**\n"
-            f"✅ **টোকেন অটোমেটিক অ্যাক্টিভেট হবে**\n\n"
-            f"⏰ **টোকেন মেয়াদ:** ১২ ঘন্টা\n"
-            f"🔄 **ভেরিফিকেশন লিংক মেয়াদ:** ২৪ ঘন্টা",
-            reply_markup=InlineKeyboardMarkup(buttons)
-        )
-    else:
-        await message.reply_text("❌ **শর্টলিংক তৈরি করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।**")
-
-@Client.on_message(filters.command("stream_status") & filters.private)
-async def stream_status_cmd(client, message):
-    """Command to check stream token status"""
-    user_id = message.from_user.id
-    
-    active_tokens = await get_user_stream_tokens(user_id)
-    
-    if not active_tokens:
-        await message.reply_text(
-            f"❌ **আপনার কোনো সক্রিয় স্ট্রিম টোকেন নেই।**\n\n"
-            f"🎬 **স্ট্রিম অ্যাক্সেস সক্রিয় করতে /activate_stream কমান্ড ব্যবহার করুন।**"
-        )
-        return
-    
-    token_info = active_tokens[0]
-    expiry_time = token_info['expiry'].strftime("%Y-%m-%d %H:%M:%S")
-    
-    # Calculate remaining time
-    from datetime import datetime
-    remaining = token_info['expiry'] - datetime.now()
-    hours = remaining.seconds // 3600
-    minutes = (remaining.seconds % 3600) // 60
-    
-    await message.reply_text(
-        f"✅ **আপনার স্ট্রিম অ্যাক্সেস সক্রিয় আছে!**\n\n"
-        f"⏰ **মেয়াদ শেষ:** {expiry_time}\n"
-        f"⏳ **বাকি সময়:** {hours} ঘন্টা {minutes} মিনিট\n\n"
-        f"🎬 **আপনি স্ট্রিম করতে পারবেন!**"
-    )
