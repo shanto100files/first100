@@ -10,8 +10,8 @@ from pyrogram.types import *
 from database.ia_filterdb import col, sec_col, get_file_details, unpack_new_file_id, get_bad_files
 from database.users_chats_db import db, delete_all_referal_users, get_referal_users_count, get_referal_all_users, referal_add_user
 from database.join_reqs import JoinReqs
-from info import CLONE_MODE, OWNER_LNK, REACTIONS, CHANNELS, REQUEST_TO_JOIN_MODE, TRY_AGAIN_BTN, ADMINS, SHORTLINK_MODE, PREMIUM_AND_REFERAL_MODE, STREAM_MODE, AUTH_CHANNEL, REFERAL_PREMEIUM_TIME, REFERAL_COUNT, PAYMENT_TEXT, PAYMENT_QR, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, CHNL_LNK, GRP_LNK, REQST_CHANNEL, SUPPORT_CHAT, MAX_B_TN, VERIFY, SHORTLINK_API, SHORTLINK_URL, TUTORIAL, VERIFY_TUTORIAL, IS_TUTORIAL, URL
-from utils import get_settings, pub_is_subscribed, get_size, is_subscribed, save_group_settings, temp, verify_user, check_token, check_verification, get_token, get_shortlink, get_tutorial, get_seconds
+from info import CLONE_MODE, OWNER_LNK, REACTIONS, CHANNELS, REQUEST_TO_JOIN_MODE, TRY_AGAIN_BTN, ADMINS, SHORTLINK_MODE, PREMIUM_AND_REFERAL_MODE, STREAM_MODE, AUTH_CHANNEL, REFERAL_PREMEIUM_TIME, REFERAL_COUNT, PAYMENT_TEXT, PAYMENT_QR, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, CHNL_LNK, GRP_LNK, REQST_CHANNEL, SUPPORT_CHAT, MAX_B_TN, VERIFY, SHORTLINK_API, SHORTLINK_URL, TUTORIAL, VERIFY_TUTORIAL, IS_TUTORIAL, URL, PUBLIC_BOT, ADMIN_ONLY_MODE
+from utils import get_settings, pub_is_subscribed, get_size, is_subscribed, save_group_settings, temp, verify_user, check_token, check_verification, get_token, get_shortlink, get_tutorial, get_seconds, is_authorized_user, check_group_admin
 from database.connections_mdb import active_connection
 from urllib.parse import quote_plus
 from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
@@ -22,6 +22,17 @@ join_db = JoinReqs
 
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
+    # Check if user is authorized to use the bot
+    user_id = message.from_user.id if message.from_user else None
+    if user_id and not await is_authorized_user(user_id, "basic"):
+        await message.reply(
+            "🚫 **অ্যাক্সেস নিষিদ্ধ**\n\n"
+            "দুঃখিত, এই বট শুধুমাত্র অনুমোদিত ব্যবহারকারীদের জন্য।\n"
+            "প্রিমিয়াম অ্যাক্সেসের জন্য অ্যাডমিনের সাথে যোগাযোগ করুন।\n\n"
+            f"👮 অ্যাডমিন: {OWNER_LNK}"
+        )
+        return
+    
     try:
         await message.react(emoji=random.choice(REACTIONS), big=False)
     except:
@@ -314,14 +325,20 @@ async def start(client, message):
             if f_caption is None:
                 f_caption = f"{title}"
             try:
-                # Show stream links if STREAM_MODE is True OR user has premium access
-                if STREAM_MODE == True or await db.has_premium_access(message.from_user.id):
+                # Show stream links if STREAM_MODE is True OR user has premium access OR free user hasn't exceeded daily limit
+                user_has_premium = await db.has_premium_access(message.from_user.id)
+                free_user_can_stream = False
+                if not user_has_premium:
+                    daily_count = await db.get_daily_stream_count(message.from_user.id)
+                    free_user_can_stream = daily_count < 2
+                
+                if STREAM_MODE == True or user_has_premium or free_user_can_stream:
                     log_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=msg.get("file_id"))
                     fileName = {quote_plus(get_name(log_msg))}
                     stream = f"{URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
                     download = f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
 
-                if STREAM_MODE == True or await db.has_premium_access(message.from_user.id):
+                if STREAM_MODE == True or user_has_premium or free_user_can_stream:
                     button = [[
                         InlineKeyboardButton("• ᴅᴏᴡɴʟᴏᴀᴅ •", url=download),
                         InlineKeyboardButton('• ᴡᴀᴛᴄʜ •', url=stream)
@@ -387,14 +404,20 @@ async def start(client, message):
                     except:
                         f_caption = getattr(msg, 'caption', '')
                 file_id = file.file_id
-                # Show stream links if STREAM_MODE is True OR user has premium access
-                if STREAM_MODE == True or await db.has_premium_access(message.from_user.id):
+                # Show stream links if STREAM_MODE is True OR user has premium access OR free user hasn't exceeded daily limit
+                user_has_premium = await db.has_premium_access(message.from_user.id)
+                free_user_can_stream = False
+                if not user_has_premium:
+                    daily_count = await db.get_daily_stream_count(message.from_user.id)
+                    free_user_can_stream = daily_count < 2
+                
+                if STREAM_MODE == True or user_has_premium or free_user_can_stream:
                     log_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=file_id)
                     fileName = {quote_plus(get_name(log_msg))}
                     stream = f"{URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
                     download = f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
 
-                if STREAM_MODE == True or await db.has_premium_access(message.from_user.id):
+                if STREAM_MODE == True or user_has_premium or free_user_can_stream:
                     button = [[
                         InlineKeyboardButton("• ᴅᴏᴡɴʟᴏᴀᴅ •", url=download),
                         InlineKeyboardButton('• ᴡᴀᴛᴄʜ •', url=stream)
@@ -519,8 +542,14 @@ async def start(client, message):
                         reply_markup=InlineKeyboardMarkup(btn)
                     )
                     return
-            # Show stream button if STREAM_MODE is True OR user has premium access
-            if STREAM_MODE == True or await db.has_premium_access(message.from_user.id):
+            # Show stream button if STREAM_MODE is True OR user has premium access OR free user hasn't exceeded daily limit
+            user_has_premium = await db.has_premium_access(message.from_user.id)
+            free_user_can_stream = False
+            if not user_has_premium:
+                daily_count = await db.get_daily_stream_count(message.from_user.id)
+                free_user_can_stream = daily_count < 2
+            
+            if STREAM_MODE == True or user_has_premium or free_user_can_stream:
                 button = [[InlineKeyboardButton('sᴛʀᴇᴀᴍ ᴀɴᴅ ᴅᴏᴡɴʟᴏᴀᴅ', callback_data=f'generate_stream_link:{file_id}')]]
                 reply_markup=InlineKeyboardMarkup(button)
             else:
@@ -628,8 +657,14 @@ async def start(client, message):
         f_caption = f"{' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@'), files['file_name'].split()))}"
     # Direct file access allowed without token verification
     # Token verification will be required only for stream/download functionality
-    # Show stream button if STREAM_MODE is True OR user has premium access
-    if STREAM_MODE == True or await db.has_premium_access(message.from_user.id):
+    # Show stream button if STREAM_MODE is True OR user has premium access OR free user hasn't exceeded daily limit
+    user_has_premium = await db.has_premium_access(message.from_user.id)
+    free_user_can_stream = False
+    if not user_has_premium:
+        daily_count = await db.get_daily_stream_count(message.from_user.id)
+        free_user_can_stream = daily_count < 2
+    
+    if STREAM_MODE == True or user_has_premium or free_user_can_stream:
         button = [[InlineKeyboardButton('sᴛʀᴇᴀᴍ ᴀɴᴅ ᴅᴏᴡɴʟᴏᴀᴅ', callback_data=f'generate_stream_link:{file_id}')]]
         reply_markup=InlineKeyboardMarkup(button)
     else:
@@ -1397,6 +1432,17 @@ async def remove_premium_cmd_handler(client, message):
 @Client.on_message(filters.command("plan"))
 async def plans_cmd_handler(client, message):
     if PREMIUM_AND_REFERAL_MODE == False:
+        return
+    
+    # Check if user is authorized to use premium commands
+    user_id = message.from_user.id if message.from_user else None
+    if user_id and not await is_authorized_user(user_id, "basic"):
+        await message.reply(
+            "🚫 **অ্যাক্সেস নিষিদ্ধ**\n\n"
+            "দুঃখিত, এই বট শুধুমাত্র অনুমোদিত ব্যবহারকারীদের জন্য।\n"
+            "প্রিমিয়াম অ্যাক্সেসের জন্য অ্যাডমিনের সাথে যোগাযোগ করুন।\n\n"
+            f"👮 অ্যাডমিন: {OWNER_LNK}"
+        )
         return
     btn = [
         [InlineKeyboardButton("💳 পেমেন্ট স্ক্রিনশট পাঠান", url=OWNER_LNK)],
