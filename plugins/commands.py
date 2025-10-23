@@ -622,22 +622,8 @@ async def start(client, message):
             f_caption=f_caption
     if f_caption is None:
         f_caption = f"{' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@'), files['file_name'].split()))}"
-    if not await db.has_premium_access(message.from_user.id):
-        if not await check_verification(client, message.from_user.id) and VERIFY == True:
-            btn = [[
-                InlineKeyboardButton("ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ", url=await get_token(client, message.from_user.id, f"https://telegram.me/{temp.U_NAME}?start="))
-            ],[
-                InlineKeyboardButton("ʜᴏᴡ ᴛᴏ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ", url=VERIFY_TUTORIAL)
-            ]]
-            text = "<b>ʜᴇʏ {} 👋,\n\nʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴠᴇʀɪꜰɪᴇᴅ ᴛᴏᴅᴀʏ, ᴘʟᴇᴀꜱᴇ ᴄʟɪᴄᴋ ᴏɴ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ & ɢᴇᴛ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴇꜱꜱ ғᴏʀ ᴛᴏᴅᴀʏ</b>"
-            if PREMIUM_AND_REFERAL_MODE == True:
-                text += "<b>ɪғ ʏᴏᴜ ᴡᴀɴᴛ ᴅɪʀᴇᴄᴛ ғɪʟᴇꜱ ᴡɪᴛʜᴏᴜᴛ ᴀɴʏ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴꜱ ᴛʜᴇɴ ʙᴜʏ ʙᴏᴛ ꜱᴜʙꜱᴄʀɪᴘᴛɪᴏɴ ☺️\n\n💶 ꜱᴇɴᴅ /plan ᴛᴏ ʙᴜʏ ꜱᴜʙꜱᴄʀɪᴘᴛɪᴏɴ</b>"
-            await message.reply_text(
-                text=text.format(message.from_user.mention),
-                protect_content=True,
-                reply_markup=InlineKeyboardMarkup(btn)
-            )
-            return
+    # Direct file access allowed without token verification
+    # Token verification will be required only for stream/download functionality
     if STREAM_MODE == True:
         button = [[InlineKeyboardButton('sᴛʀᴇᴀᴍ ᴀɴᴅ ᴅᴏᴡɴʟᴏᴀᴅ', callback_data=f'generate_stream_link:{file_id}')]]
         reply_markup=InlineKeyboardMarkup(button)
