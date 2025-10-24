@@ -11,7 +11,7 @@ from database.ia_filterdb import col, sec_col, get_file_details, unpack_new_file
 from database.users_chats_db import db, delete_all_referal_users, get_referal_users_count, get_referal_all_users, referal_add_user
 from database.join_reqs import JoinReqs
 from info import CLONE_MODE, OWNER_LNK, REACTIONS, CHANNELS, REQUEST_TO_JOIN_MODE, TRY_AGAIN_BTN, ADMINS, SHORTLINK_MODE, PREMIUM_AND_REFERAL_MODE, STREAM_MODE, AUTH_CHANNEL, REFERAL_PREMEIUM_TIME, REFERAL_COUNT, PAYMENT_TEXT, PAYMENT_QR, BKASH_NUMBER, LOG_CHANNEL, PICS, BATCH_FILE_CAPTION, CUSTOM_FILE_CAPTION, PROTECT_CONTENT, CHNL_LNK, GRP_LNK, REQST_CHANNEL, SUPPORT_CHAT, MAX_B_TN, VERIFY, SHORTLINK_API, SHORTLINK_URL, TUTORIAL, VERIFY_TUTORIAL, IS_TUTORIAL, URL, PUBLIC_BOT, ADMIN_ONLY_MODE, RESTRICT_SEARCH_TO_GROUPS, ALLOWED_GROUPS, ALLOW_PM_SEARCH, GROUP_LINKS
-from utils import get_settings, pub_is_subscribed, get_size, is_subscribed, save_group_settings, temp, verify_user, check_token, check_verification, get_token, get_shortlink, get_tutorial, get_seconds, is_authorized_user, check_group_admin
+from utils import get_settings, pub_is_subscribed, get_size, is_subscribed, save_group_settings, temp, verify_user, check_token, check_verification, get_token, get_shortlink, get_tutorial, get_seconds, is_authorized_user, check_group_admin, format_time_bengali, format_datetime_bengali
 from database.connections_mdb import active_connection
 from urllib.parse import quote_plus
 from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
@@ -301,12 +301,13 @@ async def start(client, message):
             if f_caption is None:
                 f_caption = f"{title}"
             try:
-                # Show stream links if STREAM_MODE is True OR user has premium access OR free user hasn't exceeded daily limit
+            # Show stream button if STREAM_MODE is True OR user has premium access OR free user hasn't exceeded daily stream link limit
+                # Note: This only affects showing STREAM BUTTON, not accessing telegram files which is always unlimited
                 user_has_premium = await db.has_premium_access(message.from_user.id)
                 free_user_can_stream = False
                 if not user_has_premium:
                     daily_count = await db.get_daily_stream_count(message.from_user.id)
-                    free_user_can_stream = daily_count < 2
+                    free_user_can_stream = daily_count < 2  # 2 stream link generations per day for free users
                 
                 if STREAM_MODE == True or user_has_premium or free_user_can_stream:
                     log_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=msg.get("file_id"))
@@ -380,12 +381,13 @@ async def start(client, message):
                     except:
                         f_caption = getattr(msg, 'caption', '')
                 file_id = file.file_id
-                # Show stream links if STREAM_MODE is True OR user has premium access OR free user hasn't exceeded daily limit
+                # Show stream button if STREAM_MODE is True OR user has premium access OR free user hasn't exceeded daily stream link limit
+                # Note: Telegram file access is ALWAYS unlimited - this only controls showing stream link button
                 user_has_premium = await db.has_premium_access(message.from_user.id)
                 free_user_can_stream = False
                 if not user_has_premium:
                     daily_count = await db.get_daily_stream_count(message.from_user.id)
-                    free_user_can_stream = daily_count < 2
+                    free_user_can_stream = daily_count < 2  # 2 stream link generations per day for free users
                 
                 if STREAM_MODE == True or user_has_premium or free_user_can_stream:
                     log_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=file_id)
@@ -518,12 +520,13 @@ async def start(client, message):
                         reply_markup=InlineKeyboardMarkup(btn)
                     )
                     return
-            # Show stream button if STREAM_MODE is True OR user has premium access OR free user hasn't exceeded daily limit
+            # Show stream button if STREAM_MODE is True OR user has premium access OR free user hasn't exceeded daily stream link limit
+            # Note: Telegram file access is ALWAYS unlimited - this only controls showing stream link button
             user_has_premium = await db.has_premium_access(message.from_user.id)
             free_user_can_stream = False
             if not user_has_premium:
                 daily_count = await db.get_daily_stream_count(message.from_user.id)
-                free_user_can_stream = daily_count < 2
+                free_user_can_stream = daily_count < 2  # 2 stream link generations per day for free users
             
             if STREAM_MODE == True or user_has_premium or free_user_can_stream:
                 button = [[InlineKeyboardButton('sᴛʀᴇᴀᴍ ᴀɴᴅ ᴅᴏᴡɴʟᴏᴀᴅ', callback_data=f'generate_stream_link:{file_id}')]]
@@ -590,12 +593,13 @@ async def start(client, message):
                         reply_markup=InlineKeyboardMarkup(btn)
                     )
                     return
-            # Show stream button if STREAM_MODE is True OR user has premium access OR free user hasn't exceeded daily limit
+            # Show stream button if STREAM_MODE is True OR user has premium access OR free user hasn't exceeded daily stream link limit
+            # Note: Telegram file access is ALWAYS unlimited - this only controls showing stream link button
             user_has_premium = await db.has_premium_access(message.from_user.id)
             free_user_can_stream = False
             if not user_has_premium:
                 daily_count = await db.get_daily_stream_count(message.from_user.id)
-                free_user_can_stream = daily_count < 2
+                free_user_can_stream = daily_count < 2  # 2 stream link generations per day for free users
             
             if STREAM_MODE == True or user_has_premium or free_user_can_stream:
                 button = [[InlineKeyboardButton('sᴛʀᴇᴀᴍ ᴀɴᴅ ᴅᴏᴡɴʟᴏᴀᴅ', callback_data=f'generate_stream_link:{file_id}')]]
@@ -643,12 +647,13 @@ async def start(client, message):
         f_caption = f"{' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@'), files['file_name'].split()))}"
     # Direct file access allowed without token verification
     # Token verification will be required only for stream/download functionality
-    # Show stream button if STREAM_MODE is True OR user has premium access OR free user hasn't exceeded daily limit
+    # Show stream button if STREAM_MODE is True OR user has premium access OR free user hasn't exceeded daily stream link limit
+    # Note: Telegram file access is ALWAYS unlimited - this only controls showing stream link button
     user_has_premium = await db.has_premium_access(message.from_user.id)
     free_user_can_stream = False
     if not user_has_premium:
         daily_count = await db.get_daily_stream_count(message.from_user.id)
-        free_user_can_stream = daily_count < 2
+        free_user_can_stream = daily_count < 2  # 2 stream link generations per day for free users
     
     if STREAM_MODE == True or user_has_premium or free_user_can_stream:
         button = [[InlineKeyboardButton('sᴛʀᴇᴀᴍ ᴀɴᴅ ᴅᴏᴡɴʟᴏᴀᴅ', callback_data=f'generate_stream_link:{file_id}')]]
@@ -1513,7 +1518,12 @@ async def check_plans_cmd(client, message):
     if await db.has_premium_access(user_id):
         remaining_time = await db.check_remaining_uasge(user_id)
         expiry_time = remaining_time + datetime.datetime.now()
-        await message.reply_text(f"**আপনার প্ল্যানের বিস্তারিত :\n\nঅবশিষ্ট সময় : {remaining_time}\n\nমেয়াদ শেষ : {expiry_time}**")
+        
+        # Format time in Bengali
+        formatted_remaining_time = format_time_bengali(remaining_time)
+        formatted_expiry_time = format_datetime_bengali(expiry_time)
+        
+        await message.reply_text(f"**🎯 আপনার প্রিমিয়াম প্ল্যানের বিস্তারিত :\n\n⏰ অবশিষ্ট সময় : {formatted_remaining_time}\n\n📅 মেয়াদ শেষ : {formatted_expiry_time}**")
     else:
         btn = [
             [InlineKeyboardButton("৫ মিনিটের জন্য ফ্রি ট্রায়াল নিন ☺️", callback_data="get_trail")],
