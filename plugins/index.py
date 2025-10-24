@@ -186,7 +186,7 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
             # Send bulk notification if files were added
             if total_files > 0:
                 try:
-                    from utils.notifications import send_bulk_update_notification
+                    from notification_utils.notifications import send_bulk_update_notification
                     asyncio.create_task(send_bulk_update_notification(bot, total_files, chat))
                 except Exception as e:
                     logger.error(f"Failed to send bulk notification: {e}")
