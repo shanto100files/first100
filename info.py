@@ -131,9 +131,9 @@ PUBLIC_FILE_CHANNEL = environ.get('PUBLIC_FILE_CHANNEL', '') # Public Channel Us
 
 
 # Links
-GRP_LNK = environ.get('GRP_LNK', 'https://t.me/buycinepix')
-CHNL_LNK = environ.get('CHNL_LNK', 'https://t.me/banglamovieseries')
-SUPPORT_CHAT = environ.get('SUPPORT_CHAT', 'buycinepix') # Support Chat Link Without https:// or @
+GRP_LNK = environ.get('GRP_LNK', 'https://t.me/cinepix_movies')
+CHNL_LNK = environ.get('CHNL_LNK', 'https://t.me/cinemaze_1')
+SUPPORT_CHAT = environ.get('SUPPORT_CHAT', 'cinepix_movies') # Support Chat Link Without https:// or @
 OWNER_LNK = environ.get('OWNER_LNK', 'https://t.me/neil_0998')
 
 # True Or False
@@ -280,6 +280,7 @@ ALLOWED_GROUPS = [int(x) for x in environ.get('ALLOWED_GROUPS', '').split() if x
 GROUP_LINKS = [x.strip() for x in environ.get('GROUP_LINKS', '').split(',') if x.strip()]  # List of group invite links
 
 ALLOW_PM_SEARCH = bool(environ.get('ALLOW_PM_SEARCH', True))  # Set True to allow search in private messages
+
 
 
 
