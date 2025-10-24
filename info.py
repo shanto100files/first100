@@ -13,7 +13,7 @@ id_pattern = re.compile(r'^.\d+$')
 SESSION = environ.get('SESSION', 'TechVJBot')
 API_ID = int(environ.get('API_ID', '18117505'))
 API_HASH = environ.get('API_HASH', '1428e11bc3279a1193f47079c8d748e8')
-BOT_TOKEN = environ.get('BOT_TOKEN', "")
+BOT_TOKEN = environ.get('BOT_TOKEN', "8383924215:AAFqlGWMTC9HIpX1GSAbARhdcR6YUyZEKXs")
 
 
 # This Pictures Is For Start Message Picture, You Can Add Multiple By Giving One Space Between Each.
@@ -85,30 +85,43 @@ REFERAL_COUNT = int(environ.get('REFERAL_COUNT', '20')) # number of referal coun
 REFERAL_PREMEIUM_TIME = environ.get('REFERAL_PREMEIUM_TIME', '1month') # time in week, day, month.
 PAYMENT_QR = environ.get('PAYMENT_QR', 'https://ibb.co.com/KcpfNrdM') # বিকাশ QR কোডের ছবি লিংক
 BKASH_NUMBER = environ.get('BKASH_NUMBER', '01921209102') # আপনার বিকাশ নাম্বার
-PAYMENT_TEXT = environ.get('PAYMENT_TEXT', '''<b>📲 বিকাশ পেমেন্ট প্ল্যান
+PAYMENT_TEXT = environ.get('PAYMENT_TEXT', '''<b> 🌟 *উপলব্ধ প্যাকেজসমূহ* 🌟
 
-💰 উপলব্ধ প্যাকেজ সমূহ:
+💰 *১০ টাকা* — ১ সপ্তাহ  
+💰 *৩০ টাকা* — ১ মাস  
+💰 *৯০ টাকা* — ৩ মাস  
+💰 *১৮০ টাকা* — ৬ মাস  
 
-• ২ সপ্তাহ - ১০ টাকা
-• ১ মাস - ২০ টাকা
-• ৩ মাস - ৬০ টাকা
-• ৬ মাস - ১২০ টাকা
+---
 
-✅ প্রিমিয়াম ফিচার:
-• ভেরিফিকেশন ফ্রি
-• সরাসরি ফাইল
-• বিজ্ঞাপন মুক্ত
-• হাই স্পিড ডাউনলোড
-• আনলিমিটেড কন্টেন্ট
-• ২৪/৭ সাপোর্ট
+🎁 *প্রিমিয়াম সুবিধাসমূহ* 🎁
 
-📲 বিকাশ নাম্বার: <code>{bkash}</code>
-টাইপ: পার্সোনাল
+✨ ভেরিফাই করার ঝামেলা নেই  
+✨ লিংক খুলতে হয় না  
+✨ সরাসরি ফাইল ডাউনলোড  
+✨ বিজ্ঞাপনমুক্ত অভিজ্ঞতা  
+✨ হাই-স্পিড ডাউনলোড লিংক  
+✨ মাল্টি-প্লেয়ার স্ট্রিমিং লিংক  
+✨ আনলিমিটেড মুভি ও সিরিজ  
+✨ ফুল অ্যাডমিন সাপোর্ট  
+✨ অনুরোধ পাওয়া গেলে *১ ঘণ্টার মধ্যেই সম্পন্ন করা হবে*  
 
-⚠️ পেমেন্ট করার পর স্ক্রিনশট পাঠান
+---
 
-🔄 প্ল্যান চেক করুন: /myplan</b>''') # payment code picture url.
-PAYMENT_TEXT = environ.get('PAYMENT_TEXT', '<b>- ᴀᴠᴀɪʟᴀʙʟᴇ ᴘʟᴀɴs - \n\n- 30ʀs - 1 ᴡᴇᴇᴋ\n- 50ʀs - 1 ᴍᴏɴᴛʜs\n- 120ʀs - 3 ᴍᴏɴᴛʜs\n- 220ʀs - 6 ᴍᴏɴᴛʜs\n\n🎁 ᴘʀᴇᴍɪᴜᴍ ғᴇᴀᴛᴜʀᴇs 🎁\n\n○ ɴᴏ ɴᴇᴇᴅ ᴛᴏ ᴠᴇʀɪғʏ\n○ ɴᴏ ɴᴇᴇᴅ ᴛᴏ ᴏᴘᴇɴ ʟɪɴᴋ\n○ ᴅɪʀᴇᴄᴛ ғɪʟᴇs\n○ ᴀᴅ-ғʀᴇᴇ ᴇxᴘᴇʀɪᴇɴᴄᴇ\n○ ʜɪɢʜ-sᴘᴇᴇᴅ ᴅᴏᴡɴʟᴏᴀᴅ ʟɪɴᴋ\n○ ᴍᴜʟᴛɪ-ᴘʟᴀʏᴇʀ sᴛʀᴇᴀᴍɪɴɢ ʟɪɴᴋs\n○ ᴜɴʟɪᴍɪᴛᴇᴅ ᴍᴏᴠɪᴇs & sᴇʀɪᴇs\n○ ꜰᴜʟʟ ᴀᴅᴍɪɴ sᴜᴘᴘᴏʀᴛ\n○ ʀᴇǫᴜᴇsᴛ ᴡɪʟʟ ʙᴇ ᴄᴏᴍᴘʟᴇᴛᴇᴅ ɪɴ 1ʜ ɪꜰ ᴀᴠᴀɪʟᴀʙʟᴇ\n\n✨ bkash - <code>01921209102</code>\n\nᴄʟɪᴄᴋ ᴛᴏ ᴄʜᴇᴄᴋ ʏᴏᴜʀ ᴀᴄᴛɪᴠᴇ ᴘʟᴀɴ /myplan\n\n💢 ᴍᴜsᴛ sᴇɴᴅ sᴄʀᴇᴇɴsʜᴏᴛ ᴀғᴛᴇʀ ᴘᴀʏᴍᴇɴᴛ\n\n‼️ ᴀғᴛᴇʀ sᴇɴᴅɪɴɢ ᴀ sᴄʀᴇᴇɴsʜᴏᴛ ᴘʟᴇᴀsᴇ ɢɪᴠᴇ ᴜs sᴏᴍᴇ ᴛɪᴍᴇ ᴛᴏ ᴀᴅᴅ ʏᴏᴜ ɪɴ ᴛʜᴇ ᴘʀᴇᴍɪᴜᴍ</b>')
+💸 *পেমেন্ট মাধ্যম* 💸  
+
+📱 *বিকাশ:* `{bkash}`  
+📱 *নগদ:* `{bkash}`  
+
+🔗 *আপনার সক্রিয় প্ল্যান চেক করুন:* `/myplan`
+
+---
+
+⚠️ *পেমেন্ট করার পর অবশ্যই স্ক্রিনশট পাঠাতে হবে*  
+⏳ স্ক্রিনশট পাঠানোর পর অনুগ্রহ করে কিছু সময় দিন, আমরা আপনাকে *প্রিমিয়াম তালিকায়* যুক্ত করব।
+
+
+</b>''')
 
 
 # Clone Information : If Clone Mode Is True Then Bot Clone Other Bots.
@@ -118,9 +131,9 @@ PUBLIC_FILE_CHANNEL = environ.get('PUBLIC_FILE_CHANNEL', '') # Public Channel Us
 
 
 # Links
-GRP_LNK = environ.get('GRP_LNK', 'https://t.me/cinepix_movies')
-CHNL_LNK = environ.get('CHNL_LNK', 'https://t.me/cinemaze_1')
-SUPPORT_CHAT = environ.get('SUPPORT_CHAT', 'cinepix_movies') # Support Chat Link Without https:// or @
+GRP_LNK = environ.get('GRP_LNK', 'https://t.me/buycinepix')
+CHNL_LNK = environ.get('CHNL_LNK', 'https://t.me/banglamovieseries')
+SUPPORT_CHAT = environ.get('SUPPORT_CHAT', 'buycinepix') # Support Chat Link Without https:// or @
 OWNER_LNK = environ.get('OWNER_LNK', 'https://t.me/neil_0998')
 
 # True Or False
@@ -253,23 +266,20 @@ ALLOW_PREMIUM_COMMANDS = bool(environ.get('ALLOW_PREMIUM_COMMANDS', True))  # Al
 
 # Group Search Restriction Settings
 RESTRICT_SEARCH_TO_GROUPS = bool(environ.get('RESTRICT_SEARCH_TO_GROUPS', True))  # Set True to restrict search to specific groups only
-ALLOWED_GROUPS = [int(x) for x in environ.get('ALLOWED_GROUPS', '-1003243216251').split() if x.lstrip('-').isdigit()]  # List of group IDs where search is allowed
+
+# How to get Group ID:
+# Method 1: Add @userinfobot to your group and send /start
+# Method 2: Add @RawDataBot to your group and forward any message
+# Method 3: Use /groupid command in your group (after adding your bot as admin)
+# Example: ALLOWED_GROUPS = [-1001234567890, -1009876543210]
+ALLOWED_GROUPS = [int(x) for x in environ.get('ALLOWED_GROUPS', '').split() if x.lstrip('-').isdigit()]  # List of group IDs where search is allowed
 
 # Group invite links corresponding to ALLOWED_GROUPS (same order)
 # Example: GROUP_LINKS = ["https://t.me/+AbCdEfGhIjKlMnOp", "https://t.me/group2"]
 # You can also use @username format: GROUP_LINKS = ["@moviegroup1", "@moviegroup2"]
-GROUP_LINKS = [x.strip() for x in environ.get('GROUP_LINKS', '@movie_requests_bd').split(',') if x.strip()]  # List of group invite links
+GROUP_LINKS = [x.strip() for x in environ.get('GROUP_LINKS', '').split(',') if x.strip()]  # List of group invite links
 
 ALLOW_PM_SEARCH = bool(environ.get('ALLOW_PM_SEARCH', False))  # Set True to allow search in private messages
-
-
-
-
-
-
-
-
-
 
 
 
