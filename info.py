@@ -248,7 +248,7 @@ BROADCAST_CODE = environ.get('BROADCAST_CODE', "bC9#mK2$pQ5")  # Replace with yo
 
 # Access Control Settings
 PUBLIC_BOT = bool(environ.get('PUBLIC_BOT', True))  # Set True to allow anyone to use basic commands
-ADMIN_ONLY_MODE = bool(environ.get('ADMIN_ONLY_MODE', True))  # Set True to restrict all commands to admins only
+ADMIN_ONLY_MODE = bool(environ.get('ADMIN_ONLY_MODE', False))  # Set True to restrict all commands to admins only
 ALLOW_PREMIUM_COMMANDS = bool(environ.get('ALLOW_PREMIUM_COMMANDS', True))  # Allow premium users to use certain commands
 
 # Group Search Restriction Settings
@@ -261,6 +261,7 @@ ALLOWED_GROUPS = [int(x) for x in environ.get('ALLOWED_GROUPS', '-1003243216251'
 GROUP_LINKS = [x.strip() for x in environ.get('GROUP_LINKS', '@movie_requests_bd').split(',') if x.strip()]  # List of group invite links
 
 ALLOW_PM_SEARCH = bool(environ.get('ALLOW_PM_SEARCH', False))  # Set True to allow search in private messages
+
 
 
 
