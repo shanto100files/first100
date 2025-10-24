@@ -43,7 +43,7 @@ async def save_file(media, bot=None):
         # Send notification if bot instance is provided
         if bot:
             try:
-                from utils.notifications import send_file_update_notification
+                from notification_utils.notifications import send_file_update_notification
                 import asyncio
                 asyncio.create_task(send_file_update_notification(
                     bot, file_name, media.file_size, 
