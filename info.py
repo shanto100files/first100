@@ -139,7 +139,7 @@ OWNER_LNK = environ.get('OWNER_LNK', 'https://t.me/neil_0998')
 # True Or False
 AI_SPELL_CHECK = bool(environ.get('AI_SPELL_CHECK', True))
 PM_SEARCH = bool(environ.get('PM_SEARCH', True))
-BUTTON_MODE = bool(environ.get('BUTTON_MODE', True))
+BUTTON_MODE = bool(environ.get('BUTTON_MODE', False))
 MAX_BTN = bool(environ.get('MAX_BTN', True))
 IS_TUTORIAL = bool(environ.get('IS_TUTORIAL', False))
 IMDB = bool(environ.get('IMDB', False))
@@ -286,6 +286,7 @@ ALLOW_PM_SEARCH = bool(environ.get('ALLOW_PM_SEARCH', True))  # Set True to allo
 # Channel ID example: -1001234567890 (Channel), Group ID: -1234567890 (Group)
 UPDATE_GROUP_ID = int(environ.get('UPDATE_GROUP_ID', '-1002394741456'))  # Channel/Group ID where notifications will be sent
 UPDATE_NOTIFICATIONS = bool(environ.get('UPDATE_NOTIFICATIONS', True))  # Enable/disable update notifications
+
 
 
 
