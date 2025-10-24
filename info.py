@@ -13,7 +13,7 @@ id_pattern = re.compile(r'^.\d+$')
 SESSION = environ.get('SESSION', 'TechVJBot')
 API_ID = int(environ.get('API_ID', '18117505'))
 API_HASH = environ.get('API_HASH', '1428e11bc3279a1193f47079c8d748e8')
-BOT_TOKEN = environ.get('BOT_TOKEN', "8383924215:AAFqlGWMTC9HIpX1GSAbARhdcR6YUyZEKXs")
+BOT_TOKEN = environ.get('BOT_TOKEN', "")
 
 
 # This Pictures Is For Start Message Picture, You Can Add Multiple By Giving One Space Between Each.
@@ -284,8 +284,9 @@ ALLOW_PM_SEARCH = bool(environ.get('ALLOW_PM_SEARCH', True))  # Set True to allo
 # Update Channel/Group Configuration for New File Notifications
 # RECOMMENDED: Use Channel ID (not Group) to avoid bot responding to messages
 # Channel ID example: -1001234567890 (Channel), Group ID: -1234567890 (Group)
-UPDATE_GROUP_ID = int(environ.get('UPDATE_GROUP_ID', '-1002394741456 -1002966521473'))  # Channel/Group ID where notifications will be sent
+UPDATE_GROUP_ID = int(environ.get('UPDATE_GROUP_ID', '-1002394741456'))  # Channel/Group ID where notifications will be sent
 UPDATE_NOTIFICATIONS = bool(environ.get('UPDATE_NOTIFICATIONS', True))  # Enable/disable update notifications
+
 
 
 
