@@ -279,7 +279,8 @@ ALLOWED_GROUPS = [int(x) for x in environ.get('ALLOWED_GROUPS', '').split() if x
 # You can also use @username format: GROUP_LINKS = ["@moviegroup1", "@moviegroup2"]
 GROUP_LINKS = [x.strip() for x in environ.get('GROUP_LINKS', '').split(',') if x.strip()]  # List of group invite links
 
-ALLOW_PM_SEARCH = bool(environ.get('ALLOW_PM_SEARCH', False))  # Set True to allow search in private messages
+ALLOW_PM_SEARCH = bool(environ.get('ALLOW_PM_SEARCH', True))  # Set True to allow search in private messages
+
 
 
 
