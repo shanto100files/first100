@@ -846,3 +846,86 @@ async def check_group_admin(client, chat_id, user_id):
         return user.status in [enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER]
     except:
         return False
+
+def format_time_bengali(time_delta):
+    """Format timedelta to Bengali readable format"""
+    import datetime
+    
+    if isinstance(time_delta, str):
+        # If it's a string, try to parse it as timedelta
+        try:
+            # Parse string like "0:01:51.155183"
+            parts = time_delta.split(':')
+            if len(parts) == 3:
+                hours = int(parts[0])
+                minutes = int(parts[1])
+                seconds = float(parts[2])
+                time_delta = datetime.timedelta(hours=hours, minutes=minutes, seconds=seconds)
+            else:
+                return "অজানা সময়"
+        except:
+            return "অজানা সময়"
+    
+    if not isinstance(time_delta, datetime.timedelta):
+        return "অজানা সময়"
+    
+    total_seconds = int(time_delta.total_seconds())
+    
+    if total_seconds <= 0:
+        return "মেয়াদ শেষ"
+    
+    days = total_seconds // 86400
+    hours = (total_seconds % 86400) // 3600
+    minutes = (total_seconds % 3600) // 60
+    seconds = total_seconds % 60
+    
+    time_parts = []
+    
+    if days > 0:
+        time_parts.append(f"{days} দিন")
+    if hours > 0:
+        time_parts.append(f"{hours} ঘন্টা")
+    if minutes > 0:
+        time_parts.append(f"{minutes} মিনিট")
+    if seconds > 0 and days == 0 and hours == 0:  # Only show seconds if less than an hour
+        time_parts.append(f"{seconds} সেকেন্ড")
+    
+    if not time_parts:
+        return "মেয়াদ শেষ"
+    
+    return " ".join(time_parts)
+
+def format_datetime_bengali(dt):
+    """Format datetime to Bengali readable format"""
+    import datetime
+    
+    if isinstance(dt, str):
+        try:
+            # Parse string like "2025-10-24 11:52:16.397000"
+            dt = datetime.datetime.fromisoformat(dt.replace('Z', '+00:00'))
+        except:
+            return "অজানা তারিখ"
+    
+    if not isinstance(dt, datetime.datetime):
+        return "অজানা তারিখ"
+    
+    # Bengali month names
+    bengali_months = [
+        "জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন",
+        "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"
+    ]
+    
+    day = dt.day
+    month = bengali_months[dt.month - 1]
+    year = dt.year
+    hour = dt.hour
+    minute = dt.minute
+    
+    # Convert to 12-hour format
+    am_pm = "সকাল" if hour < 12 else "বিকাল"
+    if hour == 0:
+        hour = 12
+    elif hour > 12:
+        hour -= 12
+    
+    return f"{day} {month} {year}, {hour}:{minute:02d} {am_pm}"
