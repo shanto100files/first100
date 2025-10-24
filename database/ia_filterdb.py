@@ -20,7 +20,7 @@ sec_db = sec_client[DATABASE_NAME]
 sec_col = sec_db[COLLECTION_NAME]
 
 
-async def save_file(media):
+async def save_file(media, bot=None):
     """Save file in the database."""
     
     file_id = unpack_new_file_id(media.file_id)
@@ -39,6 +39,19 @@ async def save_file(media):
     try:
         col.insert_one(file)
         print(f"{file_name} is successfully saved.")
+        
+        # Send notification if bot instance is provided
+        if bot:
+            try:
+                from utils.notifications import send_file_update_notification
+                import asyncio
+                asyncio.create_task(send_file_update_notification(
+                    bot, file_name, media.file_size, 
+                    media.caption.html if media.caption else None
+                ))
+            except Exception as e:
+                print(f"Failed to send notification: {e}")
+        
         return True, 1
     except DuplicateKeyError:
         print(f"{file_name} is already saved.")
@@ -48,6 +61,19 @@ async def save_file(media):
             try:
                 sec_col.insert_one(file)
                 print(f"{file_name} is successfully saved.")
+                
+                # Send notification if bot instance is provided
+                if bot:
+                    try:
+                        from utils.notifications import send_file_update_notification
+                        import asyncio
+                        asyncio.create_task(send_file_update_notification(
+                            bot, file_name, media.file_size, 
+                            media.caption.html if media.caption else None
+                        ))
+                    except Exception as e:
+                        print(f"Failed to send notification: {e}")
+                
                 return True, 1
             except DuplicateKeyError:
                 print(f"{file_name} is already saved.")
