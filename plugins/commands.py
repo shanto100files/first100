@@ -554,7 +554,7 @@ async def start(client, message):
                 reply_markup=InlineKeyboardMarkup(button)
             else:
                 # Trial exhausted - show premium upgrade button
-                button = [[InlineKeyboardButton('ট্রায়াল শেষ - প্রিমিয়াম নিন', callback_data='stream_limit')]]
+                button = [[InlineKeyboardButton('আজকের ট্রায়াল শেষ ২৪ ঘন্টা অপেক্ষা করুন অথবা- প্রিমিয়াম নিন', callback_data='stream_limit')]]
                 reply_markup=InlineKeyboardMarkup(button)
             msg = await client.send_cached_media(
                 chat_id=message.from_user.id,
@@ -626,7 +626,7 @@ async def start(client, message):
                 reply_markup=InlineKeyboardMarkup(button)
             else:
                 # Trial exhausted - show premium upgrade button
-                button = [[InlineKeyboardButton('ট্রায়াল শেষ - প্রিমিয়াম নিন', callback_data='stream_limit')]]
+                button = [[InlineKeyboardButton('আজকের ট্রায়াল শেষ ২৪ ঘন্টা অপেক্ষা করুন অথবা - প্রিমিয়াম নিন', callback_data='stream_limit')]]
                 reply_markup=InlineKeyboardMarkup(button)
             msg = await client.send_cached_media(
                 chat_id=message.from_user.id,
@@ -679,7 +679,7 @@ async def start(client, message):
         reply_markup=InlineKeyboardMarkup(button)
     else:
         # Trial exhausted - show premium upgrade button
-        button = [[InlineKeyboardButton('ট্রায়াল শেষ - প্রিমিয়াম নিন', callback_data='stream_limit')]]
+        button = [[InlineKeyboardButton('আজকের ট্রায়াল শেষ ২৪ঘন্টা অপেক্ষা করুন অথবা- প্রিমিয়াম নিন', callback_data='stream_limit')]]
         reply_markup=InlineKeyboardMarkup(button)
     msg = await client.send_cached_media(
         chat_id=message.from_user.id,
