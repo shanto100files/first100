@@ -1447,56 +1447,13 @@ async def cb_handler(client: Client, query: CallbackQuery):
             f_caption = f"{files['file_name']}"
 
         try:
-            # Check if user has premium access
-            has_premium = await db.has_premium_access(query.from_user.id)
-            
-            if has_premium:
-                # Premium users get direct file access
-                if clicked == typed:
-                    await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start={ident}_{file_id}")
-                    return
-                else:
-                    await query.answer(f"Hᴇʏ {query.from_user.first_name}, Tʜɪs Is Nᴏᴛ Yᴏᴜʀ Mᴏᴠɪᴇ Rᴇǫᴜᴇsᴛ. Rᴇǫᴜᴇsᴛ Yᴏᴜʀ's !", show_alert=True)
+            # All users (both free and premium) can access telegram files
+            # Only stream link generation has daily limits for free users
+            if clicked == typed:
+                await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start={ident}_{file_id}")
+                return
             else:
-                # Free users get group redirection with premium benefits info
-                if clicked == typed:
-                    # Show premium benefits and group redirection message
-                    group_links_text = ""
-                    if GROUP_LINKS:
-                        group_links_text = "\n\n<b>আমাদের গ্রুপে যোগ দিন:</b>\n"
-                        for i, (name, link) in enumerate(GROUP_LINKS.items(), 1):
-                            group_links_text += f"• <a href='{link}'>{name}</a>\n"
-                    
-                    premium_message = f"""<b>ফ্রি ইউজার সতর্কতা!</b>
-
-<b>ফাইল পেতে আমাদের গ্রুপে যোগ দিন</b>
-
-<b>ফ্রি ইউজার সীমাবদ্ধতা:</b>
-- গ্রুপে যোগ দিয়ে ফাইল পেতে হবে
-- দিনে সীমিত ডাউনলোড
-- বিজ্ঞাপন দেখতে হবে
-
-<b>প্রিমিয়াম নিয়ে পান:</b>
-- সরাসরি বট থেকে ফাইল
-- আনলিমিটেড ডাউনলোড
-- দ্রুত ডাউনলোড স্পিড
-- বিজ্ঞাপন মুক্ত অভিজ্ঞতা
-- প্রাইওরিটি সাপোর্ট
-- HD কোয়ালিটি স্ট্রিমিং
-- কোনো ফাইল সাইজ লিমিট নেই{group_links_text}
-
-<b>প্রিমিয়াম কিনতে অ্যাডমিনের সাথে যোগাযোগ করুন</b>"""
-                    
-                    btn = [
-                        [InlineKeyboardButton("💎 প্রিমিয়াম কিনুন", callback_data="buy_premium")],
-                        [InlineKeyboardButton("🔄 আবার চেষ্টা করুন", callback_data="try_again")],
-                        [InlineKeyboardButton("❌ বন্ধ করুন", callback_data="close_data")]
-                    ]
-                    
-                    await query.message.edit_text(text=premium_message, reply_markup=InlineKeyboardMarkup(btn))
-                    return
-                else:
-                    await query.answer(f"Hᴇʏ {query.from_user.first_name}, Tʜɪs Is Nᴏᴛ Yᴏᴜʀ Mᴏᴠɪᴇ Rᴇǫᴜᴇsᴛ. Rᴇǫᴜᴇsᴛ Yᴏᴜʀ's !", show_alert=True)
+                await query.answer(f"Hᴇʏ {query.from_user.first_name}, Tʜɪs Is Nᴏᴛ Yᴏᴜʀ Mᴏᴠɪᴇ Rᴇǫᴜᴇsᴛ. Rᴇǫᴜᴇsᴛ Yᴏᴜʀ's !", show_alert=True)
         except UserIsBlocked:
             await query.answer('Uɴʙʟᴏᴄᴋ ᴛʜᴇ ʙᴏᴛ ᴍᴀʜɴ !', show_alert=True)
         except PeerIdInvalid:
@@ -1510,53 +1467,20 @@ async def cb_handler(client: Client, query: CallbackQuery):
         settings = await get_settings(query.message.chat.id)
         pre = 'allfilesp' if settings['file_secure'] else 'allfiles'
         
-        # Check if user has premium access
-        if await db.has_premium_access(query.from_user.id):
-            # Premium user - direct file access
-            try:
-                if settings['is_shortlink']:
-                    await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start={pre}_{key}")
-                else:
-                    await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start={pre}_{key}")
-            except UserIsBlocked:
-                await query.answer('Uɴʙʟᴏᴄᴋ ᴛʜᴇ ʙᴏᴛ ᴍᴀʜɴ !', show_alert=True)
-            except PeerIdInvalid:
-                await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start=sendfiles3_{key}")
-            except Exception as e:
-                logger.exception(e)
-                await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start=sendfiles4_{key}")
-        else:
-            # Free user - show premium benefits and group redirection
-            btn = [[
-                InlineKeyboardButton("🔥 Buy Premium", callback_data="seeplans"),
-                InlineKeyboardButton("🔄 Try Again", callback_data=f"sendfiles#{key}")
-            ], [
-                InlineKeyboardButton("❌ Close", callback_data="close_data")
-            ]]
-            
-            await query.message.edit_text(
-                text=f"""<b>🚫 ফ্রি ইউজার সীমাবদ্ধতা:</b>
-
-- দৈনিক মাত্র ২টি ফাইল ডাউনলোড
-- গ্রুপে গিয়ে ফাইল নিতে হবে
-- বিজ্ঞাপন দেখতে হবে
-- ধীর গতির ডাউনলোড
-
-<b>🔥 প্রিমিয়াম নিয়ে পান:</b>
-
-- আনলিমিটেড ফাইল ডাউনলোড
-- ডিরেক্ট বট থেকে ফাইল
-- বিজ্ঞাপন মুক্ত অভিজ্ঞতা
-- দ্রুত গতির ডাউনলোড
-- প্রাইভেট সাপোর্ট
-
-<b>📱 গ্রুপ লিংক:</b>
-🔗 @{SUPPORT_CHAT}
-
-<b>আপনার লিমিট আগামীকাল রিসেট হবে!</b>""",
-                reply_markup=InlineKeyboardMarkup(btn),
-                parse_mode=enums.ParseMode.HTML
-            )
+        # All users can access files - no premium check for telegram file access
+        # Only stream link generation has daily limits for free users
+        try:
+            if settings['is_shortlink']:
+                await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start={pre}_{key}")
+            else:
+                await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start={pre}_{key}")
+        except UserIsBlocked:
+            await query.answer('Uɴʙʟᴏᴄᴋ ᴛʜᴇ ʙᴏᴛ ᴍᴀʜɴ !', show_alert=True)
+        except PeerIdInvalid:
+            await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start=sendfiles3_{key}")
+        except Exception as e:
+            logger.exception(e)
+            await query.answer(url=f"https://telegram.me/{temp.U_NAME}?start=sendfiles4_{key}")
 
     elif query.data.startswith("unmuteme"):
         ident, userid = query.data.split("#")
