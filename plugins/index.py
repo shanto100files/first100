@@ -142,6 +142,7 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
     deleted = 0
     no_media = 0
     unsupported = 0
+    file_details = []  # List to store file details for notification
     async with lock:
         try:
             current = temp.CURRENT
@@ -173,6 +174,27 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                 aynav, vnay = await save_file(media, bot)
                 if aynav:
                     total_files += 1
+                    # Collect file details for notification
+                    file_name = getattr(media, 'file_name', None) or f"File_{total_files}"
+                    file_size = getattr(media, 'file_size', 0)
+                    
+                    # Format file size
+                    if file_size:
+                        if file_size < 1024:
+                            size_str = f"{file_size} B"
+                        elif file_size < 1024 * 1024:
+                            size_str = f"{file_size / 1024:.1f} KB"
+                        elif file_size < 1024 * 1024 * 1024:
+                            size_str = f"{file_size / (1024 * 1024):.1f} MB"
+                        else:
+                            size_str = f"{file_size / (1024 * 1024 * 1024):.1f} GB"
+                    else:
+                        size_str = "Unknown"
+                    
+                    file_details.append({
+                        'name': file_name,
+                        'size': size_str
+                    })
                 elif vnay == 0:
                     duplicate += 1
                 elif vnay == 2:
@@ -187,6 +209,6 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
             if total_files > 0:
                 try:
                     from notification_utils.notifications import send_bulk_update_notification
-                    asyncio.create_task(send_bulk_update_notification(bot, total_files, chat))
+                    asyncio.create_task(send_bulk_update_notification(bot, total_files, chat, file_details))
                 except Exception as e:
                     logger.error(f"Failed to send bulk notification: {e}")
