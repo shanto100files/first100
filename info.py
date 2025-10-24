@@ -21,7 +21,7 @@ PICS = (environ.get('PICS', 'https://t3.ftcdn.net/jpg/05/23/04/00/360_F_52304005
 
 
 # Admins & Users
-ADMINS = [int(admin) if id_pattern.search(admin) else admin for admin in environ.get('ADMINS', '5488475852 5318059936').split()] # For Multiple Id Use One Space Between Each.
+ADMINS = [int(admin) if id_pattern.search(admin) else admin for admin in environ.get('ADMINS', '5488475852 5318059936 neil_0998').split()] # For Multiple Id Use One Space Between Each.
 auth_users = [int(user) if id_pattern.search(user) else user for user in environ.get('AUTH_USERS', '').split()]  # For Multiple Id Use One Space Between Each.
 AUTH_USERS = (auth_users + ADMINS) if auth_users else []
 
@@ -284,12 +284,8 @@ ALLOW_PM_SEARCH = bool(environ.get('ALLOW_PM_SEARCH', True))  # Set True to allo
 # Update Channel/Group Configuration for New File Notifications
 # RECOMMENDED: Use Channel ID (not Group) to avoid bot responding to messages
 # Channel ID example: -1001234567890 (Channel), Group ID: -1234567890 (Group)
-UPDATE_GROUP_ID = int(environ.get('UPDATE_GROUP_ID', '-1002394741456'))  # Channel/Group ID where notifications will be sent
+UPDATE_GROUP_ID = int(environ.get('UPDATE_GROUP_ID', '-1002394741456 -1002966521473'))  # Channel/Group ID where notifications will be sent
 UPDATE_NOTIFICATIONS = bool(environ.get('UPDATE_NOTIFICATIONS', True))  # Enable/disable update notifications
-
-
-
-
 
 
 
