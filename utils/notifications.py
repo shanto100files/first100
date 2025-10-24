@@ -49,16 +49,10 @@ async def send_file_update_notification(bot: Client, file_name: str, file_size: 
         
         message_text += f"\n✅ ফাইলটি সফলভাবে ডাটাবেসে সংরক্ষিত হয়েছে।"
         
-        # Create inline keyboard
-        keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("🔍 সার্চ করুন", switch_inline_query_current_chat=file_name[:20])]
-        ])
-        
-        # Send notification
+        # Send notification (without inline keyboard for channel compatibility)
         await bot.send_message(
             chat_id=UPDATE_GROUP_ID,
             text=message_text,
-            reply_markup=keyboard,
             parse_mode="markdown"
         )
         
