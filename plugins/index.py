@@ -170,7 +170,7 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                 media.file_type = message.media.value
                 media.caption = message.caption
                 media.thumb = None  # থাম্বনেইল রিমুভ করার জন্য
-                aynav, vnay = await save_file(media)
+                aynav, vnay = await save_file(media, bot)
                 if aynav:
                     total_files += 1
                 elif vnay == 0:
@@ -182,3 +182,11 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
             await msg.edit(f'Error: {e}')
         else:
             await msg.edit(f'Succesfully saved <code>{total_files}</code> to dataBase!\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>')
+            
+            # Send bulk notification if files were added
+            if total_files > 0:
+                try:
+                    from utils.notifications import send_bulk_update_notification
+                    asyncio.create_task(send_bulk_update_notification(bot, total_files, chat))
+                except Exception as e:
+                    logger.error(f"Failed to send bulk notification: {e}")
