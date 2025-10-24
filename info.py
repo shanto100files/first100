@@ -281,8 +281,10 @@ GROUP_LINKS = [x.strip() for x in environ.get('GROUP_LINKS', '').split(',') if x
 
 ALLOW_PM_SEARCH = bool(environ.get('ALLOW_PM_SEARCH', True))  # Set True to allow search in private messages
 
-# Update Group Configuration for New File Notifications
-UPDATE_GROUP_ID = int(environ.get('UPDATE_GROUP_ID', '-1002933767386'))  # Group ID where new file notifications will be sent
+# Update Channel/Group Configuration for New File Notifications
+# RECOMMENDED: Use Channel ID (not Group) to avoid bot responding to messages
+# Channel ID example: -1001234567890 (Channel), Group ID: -1234567890 (Group)
+UPDATE_GROUP_ID = int(environ.get('UPDATE_GROUP_ID', '-1002394741456'))  # Channel/Group ID where notifications will be sent
 UPDATE_NOTIFICATIONS = bool(environ.get('UPDATE_NOTIFICATIONS', True))  # Enable/disable update notifications
 
 
