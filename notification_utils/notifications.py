@@ -63,7 +63,7 @@ async def process_batch_notification(bot: Client):
         message_text += f"📱 **সব ডিভাইসে সাপোর্ট**\n\n"
         
         message_text += f"💎 **প্রিমিয়াম বেনেফিট পেতে যোগাযোগ:**\n"
-        message_text += f"👨‍💼 @{admin_id}"
+        message_text += f"👨‍💼 @neil_0998"
         
         # Send notification
         await bot.send_message(
@@ -189,7 +189,7 @@ async def send_bulk_update_notification(bot: Client, file_count: int, chat_title
         message_text += f"📱 **সব ডিভাইসে সাপোর্ট**\n\n"
         
         message_text += f"💎 **প্রিমিয়াম বেনেফিট পেতে যোগাযোগ:**\n"
-        message_text += f"👨‍💼 @{admin_id}"
+        message_text += f"👨‍💼 @neil_0998"
         
         # Send notification
         await bot.send_message(
