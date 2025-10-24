@@ -1513,16 +1513,16 @@ async def check_plans_cmd(client, message):
     if await db.has_premium_access(user_id):
         remaining_time = await db.check_remaining_uasge(user_id)
         expiry_time = remaining_time + datetime.datetime.now()
-        await message.reply_text(f"**Your plans details are :\n\nRemaining Time : {remaining_time}\n\nExpirytime : {expiry_time}**")
+        await message.reply_text(f"**আপনার প্ল্যানের বিস্তারিত :\n\nঅবশিষ্ট সময় : {remaining_time}\n\nমেয়াদ শেষ : {expiry_time}**")
     else:
         btn = [
-            [InlineKeyboardButton("ɢᴇᴛ ғʀᴇᴇ ᴛʀᴀɪʟ ғᴏʀ 𝟻 ᴍɪɴᴜᴛᴇꜱ ☺️", callback_data="get_trail")],
-            [InlineKeyboardButton("ʙᴜʏ sᴜʙsᴄʀɪᴘᴛɪᴏɴ : ʀᴇᴍᴏᴠᴇ ᴀᴅs", callback_data="buy_premium")],
-            [InlineKeyboardButton("⚠️ ᴄʟᴏsᴇ / ᴅᴇʟᴇᴛᴇ ⚠️", callback_data="close_data")]
+            [InlineKeyboardButton("৫ মিনিটের জন্য ফ্রি ট্রায়াল নিন ☺️", callback_data="get_trail")],
+            [InlineKeyboardButton("সাবস্ক্রিপশন কিনুন : বিজ্ঞাপন সরান", callback_data="buy_premium")],
+            [InlineKeyboardButton("⚠️ বন্ধ / মুছে ফেলুন ⚠️", callback_data="close_data")]
         ]
         reply_markup = InlineKeyboardMarkup(btn)
         m=await message.reply_sticker("CAACAgIAAxkBAAIBTGVjQbHuhOiboQsDm35brLGyLQ28AAJ-GgACglXYSXgCrotQHjibHgQ")
-        await message.reply_text(f"**😢 You Don't Have Any Premium Subscription.\n\n Check Out Our Premium /plan**",reply_markup=reply_markup)
+        await message.reply_text(f"**😢 আপনার কোনো প্রিমিয়াম সাবস্ক্রিপশন নেই।\n\n আমাদের প্রিমিয়াম /plan দেখুন**",reply_markup=reply_markup)
         await asyncio.sleep(2)
         await m.delete()
 
