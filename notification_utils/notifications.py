@@ -53,7 +53,7 @@ async def send_file_update_notification(bot: Client, file_name: str, file_size: 
         await bot.send_message(
             chat_id=UPDATE_GROUP_ID,
             text=message_text,
-            parse_mode="markdown"
+            parse_mode="md"
         )
         
         logger.info(f"Update notification sent for file: {file_name}")
@@ -87,7 +87,7 @@ async def send_bulk_update_notification(bot: Client, file_count: int, chat_title
         await bot.send_message(
             chat_id=UPDATE_GROUP_ID,
             text=message_text,
-            parse_mode="markdown"
+            parse_mode="md"
         )
         
         logger.info(f"Bulk update notification sent for {file_count} files")
