@@ -23,7 +23,7 @@ def set_update_group_id(group_id):
     UPDATE_GROUP_ID = group_id
 
 async def process_batch_notification(bot: Client):
-    """Process and send batch notification for pending files"""
+    """Process and send batch notification for pending files with inline buttons"""
     global pending_files, batch_timer
     
     if not pending_files:
@@ -39,38 +39,99 @@ async def process_batch_notification(bot: Client):
         from info import ADMINS
         admin_id = ADMINS[0] if ADMINS else "YourAdmin"
         
-        message_text = f"📅 **আজকের আপডেট**\n\n"
+        total_files = len(pending_files)
+        messages_needed = (total_files + 29) // 30  # 30 files per message (max buttons)
         
-        # Add file details
-        for i, file_info in enumerate(pending_files[:15], 1):  # Limit to 15 files to avoid message length issues
-            file_name = file_info.get('name', 'Unknown')
-            file_size = file_info.get('size', 'Unknown')
-            message_text += f"📁 **{i}.** `{file_name}`\n"
-            message_text += f"📊 **সাইজ:** `{file_size}`\n\n"
+        # Send multiple messages if needed
+        for msg_num in range(messages_needed):
+            start_idx = msg_num * 30
+            end_idx = min((msg_num + 1) * 30, total_files)
+            current_batch = pending_files[start_idx:end_idx]
+            
+            # Create message text
+            if messages_needed > 1:
+                message_text = f"📅 **আজকের আপডেট (Part {msg_num + 1}/{messages_needed})**\n\n"
+            else:
+                message_text = f"📅 **আজকের আপডেট**\n\n"
+            
+            # Add file details with global numbering
+            for i, file_info in enumerate(current_batch, start_idx + 1):
+                file_name = file_info.get('name', 'Unknown')
+                file_size = file_info.get('size', 'Unknown')
+                message_text += f"📁 **{i}.** `{file_name}`\n"
+                message_text += f"📊 **সাইজ:** `{file_size}`\n\n"
         
-        if len(pending_files) > 15:
-            message_text += f"➕ **আরো {len(pending_files) - 15} টি ফাইল...**\n\n"
-        
-        message_text += f"🎬 **মুভি/সিরিজ অনলাইন দেখতে ভিজিট করুন:**\n"
-        message_text += f"🌐 **Cinemaze.top**\n\n"
-        
-        message_text += f"📥 **ডাউনলোড করতে ভিজিট করুন:**\n"
-        message_text += f"🤖 @{bot_username}\n\n"
-        
-        message_text += f"⚡ **টেলিগ্রাম ফাইল ছাড়াই ডিরেক্ট লিংক থেকে ডাউনলোড করুন**\n"
-        message_text += f"🎯 **দ্রুত ডাউনলোড স্পিড**\n"
-        message_text += f"🔒 **নিরাপদ ও সুরক্ষিত**\n"
-        message_text += f"📱 **সব ডিভাইসে সাপোর্ট**\n\n"
-        
-        message_text += f"💎 **প্রিমিয়াম বেনেফিট পেতে যোগাযোগ:**\n"
-        message_text += f"👨‍💼 @neil_0998"
-        
-        # Send notification
-        await bot.send_message(
-            chat_id=UPDATE_GROUP_ID,
-            text=message_text,
-            parse_mode=enums.ParseMode.MARKDOWN
-        )
+            message_text += f"🎬 **মুভি/সিরিজ অনলাইন দেখতে ভিজিট করুন:**\n"
+            message_text += f"🌐 **Cinemaze.top**\n\n"
+            
+            message_text += f"📥 **ডাউনলোড করতে ভিজিট করুন:**\n"
+            message_text += f"🤖 @{bot_username}\n\n"
+            
+            message_text += f"⚡ **টেলিগ্রাম ফাইল ছাড়াই ডিরেক্ট লিংক থেকে ডাউনলোড করুন**\n"
+            message_text += f"🎯 **দ্রুত ডাউনলোড স্পিড**\n"
+            message_text += f"🔒 **নিরাপদ ও সুরক্ষিত**\n"
+            message_text += f"📱 **সব ডিভাইসে সাপোর্ট**\n\n"
+            
+            message_text += f"💎 **প্রিমিয়াম বেনেফিট পেতে যোগাযোগ:**\n"
+            message_text += f"👨‍💼 @{admin_id}\n\n"
+            
+            message_text += f"👇 **নিচের বাটনে ক্লিক করে ফাইল পান**"
+            
+            # Create inline buttons for current batch
+            buttons = []
+            for i, file_info in enumerate(current_batch, start_idx + 1):
+                file_id = file_info.get('file_id')
+                if file_id:
+                    # Create button with file number
+                    buttons.append(
+                        InlineKeyboardButton(
+                            f"📥 {i}",
+                            callback_data=f"getfile_{file_id}"
+                        )
+                    )
+            
+            # Arrange buttons in rows of 6 (fits better)
+            button_rows = []
+            for i in range(0, len(buttons), 6):
+                button_rows.append(buttons[i:i+6])
+            
+            # Add Get All Files button for this batch
+            if len(current_batch) > 1:
+                batch_file_ids = ','.join([f['file_id'] for f in current_batch if f.get('file_id')])
+                if msg_num == messages_needed - 1 and total_files > 30:
+                    # Last message - add button for ALL files
+                    all_file_ids = ','.join([f['file_id'] for f in pending_files if f.get('file_id')])
+                    button_rows.append([
+                        InlineKeyboardButton(
+                            f"📦 এই Batch এর সব ({len(current_batch)})",
+                            callback_data=f"getallfiles_{batch_file_ids}"
+                        ),
+                        InlineKeyboardButton(
+                            f"📦 সম্পূর্ণ সব ({total_files})",
+                            callback_data=f"getallfiles_{all_file_ids}"
+                        )
+                    ])
+                else:
+                    button_rows.append([
+                        InlineKeyboardButton(
+                            f"📦 এই Batch এর সব ({len(current_batch)})",
+                            callback_data=f"getallfiles_{batch_file_ids}"
+                        )
+                    ])
+            
+            keyboard = InlineKeyboardMarkup(button_rows) if button_rows else None
+            
+            # Send notification with buttons
+            await bot.send_message(
+                chat_id=UPDATE_GROUP_ID,
+                text=message_text,
+                parse_mode=enums.ParseMode.MARKDOWN,
+                reply_markup=keyboard
+            )
+            
+            # Small delay between messages
+            if msg_num < messages_needed - 1:
+                await asyncio.sleep(1)
         
         logger.info(f"Batch notification sent for {len(pending_files)} files")
         
@@ -84,7 +145,7 @@ async def process_batch_notification(bot: Client):
         pending_files.clear()
         batch_timer = None
 
-async def send_file_update_notification(bot: Client, file_name: str, file_size: int, caption: str = None):
+async def send_file_update_notification(bot: Client, file_name: str, file_size: int, file_id: str = None, caption: str = None):
     """
     Add file to batch notification queue instead of sending immediate notification
     
@@ -92,6 +153,7 @@ async def send_file_update_notification(bot: Client, file_name: str, file_size: 
         bot: Pyrogram client instance
         file_name: Name of the file
         file_size: Size of the file in bytes
+        file_id: Telegram file_id for direct file access
         caption: Optional caption for the file
     """
     global pending_files, batch_timer
@@ -114,6 +176,7 @@ async def send_file_update_notification(bot: Client, file_name: str, file_size: 
         file_info = {
             'name': file_name,
             'size': size_str,
+            'file_id': file_id,
             'caption': caption
         }
         pending_files.append(file_info)
